@@ -6,6 +6,8 @@ API docs: https://nvd.nist.gov/developers/vulnerabilities
 """
 import logging
 import os
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FutureTimeoutError
 from datetime import datetime, timedelta, timezone
 
 from typing import Optional
@@ -60,12 +62,24 @@ class NVDCollector(BaseCollector):
         }
         headers = {"apiKey": self.api_key} if self.api_key else {}
 
+        def _do_request():
+            return requests.get(NVD_API_URL, params=params, headers=headers, timeout=(10, 20))
+
+        pool = ThreadPoolExecutor(max_workers=1)
         try:
-            resp = requests.get(NVD_API_URL, params=params, headers=headers, timeout=30)
+            future = pool.submit(_do_request)
+            resp = future.result(timeout=35)  # жёсткий предел на ВЕСЬ запрос
             resp.raise_for_status()
+        except FutureTimeoutError:
+            logger.error("NVD fetch timed out after 35s (hard limit) — skipping")
+            return []
         except requests.RequestException as e:
             logger.error("NVD fetch failed: %s", e)
             return []
+        finally:
+            # wait=False: не блокируем скрипт, если поток всё ещё висит на медленном сокете —
+            # процесс python завершится сам и заберёт поток с собой
+            pool.shutdown(wait=False)
 
         data = resp.json()
         threats = []
