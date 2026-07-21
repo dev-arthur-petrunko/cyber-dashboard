@@ -7,6 +7,7 @@ import logging
 import requests
 
 from app.collectors.base import BaseCollector
+from app.http_utils import hard_timeout_get
 from app.models.threat import ExploitMaturity, Severity, Threat, ThreatType
 
 logger = logging.getLogger(__name__)
@@ -22,7 +23,7 @@ class CISAKEVCollector(BaseCollector):
 
     def fetch(self) -> list[Threat]:
         try:
-            resp = requests.get(CISA_KEV_URL, timeout=30)
+            resp = hard_timeout_get(CISA_KEV_URL, hard_timeout=35)
             resp.raise_for_status()
         except requests.RequestException as e:
             logger.error("CISA KEV fetch failed: %s", e)
@@ -34,8 +35,6 @@ class CISAKEVCollector(BaseCollector):
             cve_id = vuln.get("cveID")
             if not cve_id:
                 continue
-            # Всё, что попало в KEV, по определению активно эксплуатируется —
-            # это уже сигнал уровня Critical/High независимо от CVSS.
             severity = Severity.critical if vuln.get(
                 "knownRansomwareCampaignUse"
             ) == "Known" else Severity.high
