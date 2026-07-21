@@ -34,6 +34,6 @@ jobs:
         run: |
           git config user.name "threat-bot"
           git config user.email "actions@github.com"
-          git add data/threats.db
+          git add -f data/threats.db
           git diff --staged --quiet || git commit -m "chore: update threat database [skip ci]"
           git push
