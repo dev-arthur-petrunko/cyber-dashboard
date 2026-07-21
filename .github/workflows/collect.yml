@@ -1,5 +1,8 @@
 name: Collect threat data
 
+permissions:
+  contents: write
+  
 on:
   schedule:
     # Каждый час. Для 1 раза в день замени на: '0 6 * * *'
