@@ -1,0 +1,39 @@
+name: Collect threat data
+
+on:
+  schedule:
+    # Каждый час. Для 1 раза в день замени на: '0 6 * * *'
+    - cron: "0 * * * *"
+  workflow_dispatch: {}   # можно запускать вручную из вкладки Actions
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run collectors
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ABUSECH_AUTH_KEY: ${{ secrets.ABUSECH_AUTH_KEY }}
+          OTX_API_KEY: ${{ secrets.OTX_API_KEY }}
+        run: python -m app.pipeline
+
+      # Если БД — SQLite-файл в репозитории (простой вариант для MVP):
+      - name: Commit updated database
+        if: env.DATABASE_URL == ''
+        run: |
+          git config user.name "threat-bot"
+          git config user.email "actions@github.com"
+          git add data/threats.db
+          git diff --staged --quiet || git commit -m "chore: update threat database [skip ci]"
+          git push

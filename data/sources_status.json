@@ -1,0 +1,141 @@
+{
+  "integrated_ua": [
+    {
+      "name": "CERT-UA",
+      "url": "https://cert.gov.ua",
+      "status": "active",
+      "description": "Офіційні попередження та звіти про кібератаки в Україні"
+    },
+    {
+      "name": "Interfax Ukraine",
+      "url": "https://interfax.com.ua",
+      "status": "active",
+      "description": "Новини про кіберзагрози та держустанови України"
+    },
+    {
+      "name": "ІМІ (Інститут масової інформації)",
+      "url": "https://imi.org.ua",
+      "status": "active",
+      "description": "Попередження про фішингові кампанії та інформаційну безпеку"
+    },
+    {
+      "name": "The Hacker News (Ukraine)",
+      "url": "https://thehackernews.com",
+      "status": "active",
+      "description": "Міжнародні матеріали про APT та атаки на Україну"
+    },
+    {
+      "name": "SOC Prime",
+      "url": "https://socprime.com/blog",
+      "status": "active",
+      "description": "Технічний аналіз та правила детекції для українських APT"
+    },
+    {
+      "name": "ThreatFox (abuse.ch)",
+      "url": "https://threatfox.abuse.ch",
+      "status": "active",
+      "description": "IoC-індикатори компрометації, пов'язані з українськими загрозами (потрібен API-ключ)"
+    },
+    {
+      "name": "ESET WeLiveSecurity",
+      "url": "https://www.welivesecurity.com",
+      "status": "active",
+      "description": "Аналітика вайперів та атак на українську інфраструктуру через RSS"
+    },
+    {
+      "name": "Cisco Talos Intelligence",
+      "url": "https://blog.talosintelligence.com",
+      "status": "active",
+      "description": "Технічні звіти партнерів CERT-UA через RSS"
+    }
+  ],
+  "telemetry_api": [
+    {
+      "name": "ThreatFox / MalwareBazaar (abuse.ch)",
+      "url": "https://mb-api.abuse.ch/",
+      "status": "active",
+      "description": "JSON API для свіжих IoC та семплів малварі за тегами (Ukraine, UAC-0010, Sandworm). Інтегровано з API-ключем abuse.ch.",
+      "requires_key": "ABUSECH_AUTH_KEY",
+      "docs": "https://mb-api.abuse.ch/"
+    },
+    {
+      "name": "AlienVault OTX",
+      "url": "https://otx.alienvault.com",
+      "status": "active",
+      "description": "Велика база IoC та pulses (кампанії/звіти). Інтегровано з API-ключем.",
+      "requires_key": "OTX_API_KEY",
+      "docs": "https://otx.alienvault.com/api/"
+    },
+    {
+      "name": "Shadowserver Foundation",
+      "url": "https://www.shadowserver.org",
+      "status": "planned",
+      "description": "Статистика заражених пристроїв, DDoS та сканувань. Повні дампи вимагають підписки як CERT/AS-власник.",
+      "requires_key": null,
+      "docs": "https://api.shadowserver.org/"
+    }
+  ],
+  "vendor_rss": [
+    {
+      "name": "ESET WeLiveSecurity",
+      "url": "https://www.welivesecurity.com/feed/",
+      "status": "active",
+      "description": "Розбір вайперів (HermeticWiper, CaddyWiper) та атак на енергосети України"
+    },
+    {
+      "name": "Cisco Talos Intelligence",
+      "url": "https://blog.talosintelligence.com/rss/",
+      "status": "active",
+      "description": "Технічні звіти Talos, партнерів CERT-UA"
+    }
+  ],
+  "planned_ua": [
+    {
+      "name": "Держспецзв'язку / SSSCIP",
+      "url": "https://cip.gov.ua/ua/news",
+      "problem": "Access Denied від Akamai EdgeSuite навіть через Playwright у цій мережі.",
+      "possible_solution": "Потрібен запуск з іншої IP/мережі, резидентний проксі або доступ через офіційний API/канал."
+    },
+    {
+      "name": "НКЦК при РНБО",
+      "url": "https://rnbo.gov.ua/ua/Novyny/",
+      "problem": "Реалізовано збір зі сторінки новин, але новини кібертематики зустрічаються рідко.",
+      "possible_solution": "Моніторити /ua/Novyny/ і фільтрувати за темами: кібер, штучний інтелект, критична інфраструктура."
+    },
+    {
+      "name": "СБУ / Департамент кібербезпеки",
+      "url": "https://ssu.gov.ua/novyny",
+      "problem": "Access Denied від Akamai EdgeSuite навіть через Playwright у цій мережі.",
+      "possible_solution": "Потрібен запуск з іншої IP/мережі або офіційний канал/RSS СБУ."
+    },
+    {
+      "name": "НБУ — CSIRT-BANK",
+      "url": "https://bank.gov.ua",
+      "problem": "Є команда кібербезпеки банківського сектора, але публікує нерегулярно та не через відкриту стрічку.",
+      "possible_solution": "Моніторити обидва джерела: (1) розділ безпеки/захисту інформації на bank.gov.ua, (2) офіційні повідомлення та прес-релізи НБУ як регулятора банківського сектора."
+    }
+  ],
+  "telegram_channels": [
+    {
+      "name": "CERT-UA",
+      "url": "https://t.me/cert_ua",
+      "description": "Офіційний канал CERT-UA (перевірити доступність — зараз може бути порожнім або недоступним)"
+    },
+    {
+      "name": "Держспецзв'язку",
+      "url": "https://t.me/SSCIP_UA",
+      "description": "Офіційний канал Держспецзв'язку (працює)"
+    },
+    {
+      "name": "Кіберполіція",
+      "url": "https://t.me/CyberpolUA",
+      "description": "Офіційний канал Кіберполіції"
+    },
+    {
+      "name": "Кібербезпека важлива",
+      "url": "https://t.me/cybersec2021",
+      "description": "Незалежний канал (посилання не відкривається — можливо, канал видалено або змінено адресу)"
+    }
+  ],
+  "note": "Telegram-канали не інтегровані, оскільки використовують інший протокол (не RSS/HTTP). Для їх підключення потрібен окремий Telegram-bot або MTProto-клієнт."
+}
