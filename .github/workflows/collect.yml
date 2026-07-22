@@ -1,5 +1,8 @@
 name: Collect threat data
 
+permissions:
+  contents: write
+
 on:
   schedule:
     # Каждый час. Для 1 раза в день замени на: '0 6 * * *'
@@ -9,6 +12,8 @@ on:
 jobs:
   collect:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
     steps:
       - uses: actions/checkout@v4
 
@@ -34,6 +39,6 @@ jobs:
         run: |
           git config user.name "threat-bot"
           git config user.email "actions@github.com"
-          git add data/threats.db
+          git add -f data/threats.db
           git diff --staged --quiet || git commit -m "chore: update threat database [skip ci]"
           git push

@@ -84,6 +84,14 @@ export const translations = {
       light: "Світла",
       dark: "Темна",
     },
+    explain: {
+      whatIs: "Що це?",
+      risk: "Ризик",
+      recommendations: "Рекомендації",
+      loading: "Завантаження пояснення...",
+      error: "Не вдалося завантажити пояснення",
+      viewSource: "Переглянути джерело",
+    },
   },
   en: {
     header: {
@@ -167,6 +175,14 @@ export const translations = {
     theme: {
       light: "Light",
       dark: "Dark",
+    },
+    explain: {
+      whatIs: "What is this?",
+      risk: "Risk",
+      recommendations: "Recommendations",
+      loading: "Loading explanation...",
+      error: "Failed to load explanation",
+      viewSource: "View source",
     },
   },
 } as const;

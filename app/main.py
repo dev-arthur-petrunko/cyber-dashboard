@@ -12,6 +12,8 @@ from sqlalchemy.orm import Session
 
 from app.db import ThreatORM, get_session, init_db
 from app.timeline import build_timeline
+from app.explanation import generate_explanation
+from app.models.threat import Threat
 
 app = FastAPI(
     title="UA Cyber Threat Dashboard API",
@@ -89,7 +91,47 @@ def get_threat(threat_id: int, db: Session = Depends(get_session)):
     row = db.query(ThreatORM).filter(ThreatORM.id == threat_id).first()
     if not row:
         return {"error": "not found"}
-    return _serialize(row)
+    data = _serialize(row)
+    # Generate explanation and recommendations
+    threat_model = Threat(
+        external_id=row.external_id or "",
+        title=row.title,
+        source=row.source,
+        type=row.type,
+        severity=row.severity,
+        summary=row.summary,
+        cve_id=row.cve_id,
+        cvss_score=row.cvss_score,
+        epss_score=row.epss_score,
+        exploit_maturity=row.exploit_maturity,
+        url=row.url,
+        published=row.published or datetime.utcnow(),
+    )
+    data["explanation"] = generate_explanation(threat_model)
+    return data
+
+
+@app.get("/threats/{threat_id}/explain")
+def explain_threat(threat_id: int, db: Session = Depends(get_session)):
+    """Get explanation and recommendations for a specific threat."""
+    row = db.query(ThreatORM).filter(ThreatORM.id == threat_id).first()
+    if not row:
+        return {"error": "not found"}
+    threat_model = Threat(
+        external_id=row.external_id or "",
+        title=row.title,
+        source=row.source,
+        type=row.type,
+        severity=row.severity,
+        summary=row.summary,
+        cve_id=row.cve_id,
+        cvss_score=row.cvss_score,
+        epss_score=row.epss_score,
+        exploit_maturity=row.exploit_maturity,
+        url=row.url,
+        published=row.published or datetime.utcnow(),
+    )
+    return generate_explanation(threat_model)
 
 
 @app.get("/stats")

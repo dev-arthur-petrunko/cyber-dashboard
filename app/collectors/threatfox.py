@@ -80,10 +80,12 @@ class ThreatFoxCollector(BaseCollector):
                 Severity.medium
             )
 
+            # Make title unique by including truncated IoC value
+            ioc_short = ioc_value[:30] + "..." if len(ioc_value) > 30 else ioc_value
             threats.append(
                 Threat(
                     external_id=ioc_id,
-                    title=f"{malware}: {ioc_type} indicator",
+                    title=f"{malware}: {ioc_type} — {ioc_short}",
                     source=self.source_name,
                     type=ThreatType.ioc,
                     severity=severity,

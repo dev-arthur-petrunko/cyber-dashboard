@@ -2,6 +2,12 @@ export type Region = "UA" | "World";
 export type Severity = "Critical" | "High" | "Medium" | "Low" | "Unknown";
 export type ExploitMaturity = "PoC" | "Weaponized" | "In the wild" | "Unknown";
 
+export interface Explanation {
+  explanation: string;
+  risk: string;
+  recommendations: string[];
+}
+
 export interface Threat {
   id: number;
   external_id: string;
@@ -21,6 +27,7 @@ export interface Threat {
   cvss_score: number | null;
   epss_score: number | null;
   exploit_maturity: ExploitMaturity;
+  explanation?: Explanation;
 }
 
 export interface TimelineEvent {
