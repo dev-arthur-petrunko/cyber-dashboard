@@ -34,6 +34,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ABUSECH_AUTH_KEY: ${{ secrets.ABUSECH_AUTH_KEY }}
           OTX_API_KEY: ${{ secrets.OTX_API_KEY }}
+          N8N_WEBHOOK_URL: ${{ secrets.N8N_WEBHOOK_URL }}
         run: python -m app.pipeline
 
       # Если БД — SQLite-файл в репозитории (простой вариант для MVP):
