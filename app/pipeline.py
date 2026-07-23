@@ -5,6 +5,7 @@
     python -m app.pipeline
 """
 import logging
+from datetime import datetime
 
 from dotenv import load_dotenv
 
@@ -29,6 +30,7 @@ from app.collectors.threatfox import ThreatFoxCollector
 from app.collectors.vendor_rss import VendorRSSCollector
 from app.db import SessionLocal, init_db
 from app.enrichment import enrich_epss
+from app.notifications import notify_n8n
 from app.storage import bulk_upsert
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -61,6 +63,7 @@ COLLECTORS = [
 def run():
     init_db()
     db = SessionLocal()
+    run_start = datetime.utcnow()
     summary = {}
     try:
         for collector in COLLECTORS:
@@ -83,6 +86,8 @@ def run():
         except Exception as e:
             logger.exception("EPSS enrichment crashed: %s", e)
             summary["epss_enrichment"] = {"error": str(e)}
+
+        notify_n8n(db, run_start, summary)
     finally:
         db.close()
 
