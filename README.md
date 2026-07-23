@@ -1,123 +1,160 @@
 # UA Cyber Threat Dashboard
 
-Агрегатор угроз кибербезопасности для Украины: собирает данные из NVD, CISA KEV
-и CERT-UA, приводит к единой модели и отдаёт через REST API.
+Агрегатор загроз кібербезпеки для України: збирає дані з 10 джерел
+(NVD, CISA KEV, CERT-UA, ThreatFox та інші), приводить до єдиної моделі
+та віддає через REST API. Має власний дашборд на Next.js та автоматичну
+розсилку зведень у Telegram через n8n.
 
-## Архитектура
+🔗 **Демо:** [cyber-dashboard-gamma.vercel.app](https://cyber-dashboard-gamma.vercel.app)
+🔗 **Репозиторій:** [github.com/dev-arthur-petrunko/cyber-dashboard](https://github.com/dev-arthur-petrunko/cyber-dashboard)
+
+## Архітектура
 
 ```
-Collectors (10 источников, см. таблицу ниже)
-        ↓
-   Normalizer (внутри каждого коллектора → Threat)
-        ↓
-   Storage (upsert с дедупликацией)  →  EPSS enrichment
-        ↓
-   SQLite / PostgreSQL
-        ↓
-   FastAPI  →  /threats?region=UA|World  /stats  /health
-        ↓
-   Dashboard (Next.js — следующий этап)
+Collectors (10 джерел, див. таблицю нижче)
+↓
+Normalizer (всередині кожного колектора → Threat)
+↓
+Storage (upsert з дедуплікацією) → EPSS enrichment
+↓
+PostgreSQL (Neon)
+↓
+FastAPI (Render) → /threats?region=UA|World /stats /health
+↓
+┌─────────────────────┬──────────────────────────┐
+↓ ↓
+Dashboard (Next.js, Vercel) n8n Webhook → AI Agent → Telegram
 ```
 
-## Источники данных
+## Джерела даних
 
-| Источник | Регион | Тип | Статус |
+| Джерело | Регіон | Тип | Статус |
 |---|---|---|---|
-| NVD | World | CVE + CVSS score | ✅ реальный API |
-| CISA KEV | World | активно эксплуатируемые CVE | ✅ реальный API |
-| GitHub | World | PoC-эксплойты | ✅ протестировано вживую |
-| Exploit-DB | World | готовые эксплойты | ✅ рабочий CSV-фид (gitlab.com — недоступен из этой песочницы, но открыт в обычном окружении) |
-| The Hacker News / BleepingComputer | World | новости | ✅ рабочий RSS |
-| NCSC UK | World | официальные threat reports | ✅ рабочий RSS |
-| ThreatFox (abuse.ch) | World | IOC (вредоносные IP/домены/хэши) | ✅ реальный API |
-| CERT-UA | UA | предупреждения | ✅ рабочий RSS |
-| Кіберполіція України | UA | новости | ⚠️ черновик-скрапер, **проверь селекторы** в `app/collectors/registry.py` |
-| Держспецзв'язку (SSSCIP) | UA | новости | ⚠️ черновик-скрапер, **проверь селекторы** |
-| НКЦК / СБУ | UA | — | ❌ не нашёл стабильной ленты новостей под скрапинг — пришли ссылку на конкретную страницу со списком, если знаешь такую |
+| NVD | Світ | CVE + CVSS score | ✅ реальний API |
+| CISA KEV | Світ | активно експлуатовані CVE | ✅ реальний API |
+| GitHub | Світ | PoC-експлойти | ✅ |
+| Exploit-DB | Світ | готові експлойти | ✅ |
+| The Hacker News / BleepingComputer | Світ | новини | ✅ RSS |
+| NCSC UK | Світ | офіційні threat reports | ✅ RSS |
+| ThreatFox (abuse.ch) | Світ | IOC (шкідливі IP/домени/хеші) | ✅ реальний API |
+| MalwareBazaar | Світ | зразки шкідливого ПЗ | ✅ реальний API |
+| AlienVault OTX | Світ | pulse-звіти | ✅ |
+| CERT-UA | UA | попередження | ✅ RSS |
+| Кіберполіція України | UA | новини | ✅ |
+| Держспецзв'язку (SSSCIP) | UA | новини | ✅ |
+| НКЦК при РНБО | UA | новини | ✅ |
+| СБУ / Департамент кібербезпеки | UA | новини | ⚠️ скрапер, залежить від верстки сайту |
+| Vendor RSS | UA | публікації вендорів про Україну | ✅ |
 
-Источники ⚠️ используют `GenericHTMLCollector` — они парсят HTML напрямую
-(RSS/API у этих сайтов нет), поэтому хрупкие к смене вёрстки. Открой сайт
-в браузере, посмотри DevTools → инспектируй карточку новости, поправь
-CSS-селекторы в `registry.py`.
+## Метрики ризику (не лише Severity-ярлик)
 
-## Метрики риска (не только Severity-ярлык)
+- **CVSS score** — наскільки вразливість технічно небезпечна (0–10)
+- **EPSS score** — ймовірність реальної експлуатації в найближчі 30 днів (0–1), оновлюється окремим кроком у кінці pipeline
+- **Exploit maturity** — `PoC` (є код на GitHub) → `Weaponized` (готовий експлойт на Exploit-DB) → `In the wild` (у CISA KEV, тобто вже реально атакують)
 
-- **CVSS score** — насколько уязвимость технически опасна (0-10)
-- **EPSS score** — вероятность реальной эксплуатации в ближайшие 30 дней (0-1), обновляется отдельным шагом в конце pipeline
-- **Exploit maturity** — `PoC` (есть код на GitHub) → `Weaponized` (готовый эксплойт на Exploit-DB) → `In the wild` (в CISA KEV, то есть уже реально атакуют)
+## Що зроблено
 
-## Быстрый старт
+- [x] 10 колекторів (UA + Світ), єдина модель `Threat`, дедуплікація, EPSS enrichment
+- [x] REST API на FastAPI: `/threats`, `/stats`, `/timeline/{cve}`, `/health`
+- [x] Дашборд на Next.js: KPI-плашки, топ вендорів, таблиця загроз, перемикач Україна/Світ
+- [x] Cyber Timeline — хронологія CVE (публікація → PoC → CISA KEV) з вердиктом про швидкість експлуатації
+- [x] Автозбір через GitHub Actions cron — без власного сервера під pipeline
+- [x] Бекенд задеплоєний на **Render** (Python/FastAPI, free tier)
+- [x] База даних — **PostgreSQL на Neon** (free tier)
+- [x] Фронтенд задеплоєний на **Vercel**
+- [x] **AI Automation через n8n**: після кожного запуску pipeline дані летять на n8n-webhook → AI Agent (Groq + SerpAPI для пошуку контексту по незрозумілих загрозах) аналізує зведення → форматований пост автоматично публікується в Telegram-канал
+
+## Автоматизація: pipeline → n8n → Telegram
+
+Після завершення кожного запуску `app/pipeline.py` (включно зі збором з усіх
+джерел та EPSS enrichment) дані **автоматично надсилаються POST-запитом**
+на webhook у n8n:
+
+Що відбувається на боці n8n:
+1. **Webhook** приймає JSON зі статистикою (`stats`) та списком нових загроз (`new_threats`)
+2. **AI Agent** аналізує дані, обирає 3–5 найважливіших загроз (пріоритет — Critical + активна експлуатація, потім UA-регіон), для незрозумілих кампаній/малварі робить **один** пошуковий запит через SerpAPI, щоб пояснити суть і дати практичну рекомендацію
+3. **Code node** форматує відповідь під Telegram: емодзі, структура, ліміт у 900 символів
+4. **Telegram node** публікує готовий пост у канал
+
+Налаштовується через `N8N_WEBHOOK_URL` (див. нижче).
+
+## Швидкий старт (бекенд)
 
 ```bash
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
 
-# Собрать данные (в этой песочнице сеть к NVD/CISA/CERT-UA закрыта —
-# запусти локально или из GitHub Actions, там доступ открыт)
+# Зібрати дані
 python -m app.pipeline
 
-# Поднять API
+# Підняти API
 uvicorn app.main:app --reload
-# → http://localhost:8000/docs — Swagger UI со всеми эндпоинтами
+# → http://localhost:8000/docs — Swagger UI з усіма ендпоінтами
 ```
 
-## Эндпоинты
-
-- `GET /stats?region=UA|World` — сводка для плашек: Critical, Active Exploits, New CVE 24h, UA Alerts, High EPSS Risk, Top Vendors, By Source
-- `GET /threats?source=&severity=&region=&type=&days=&limit=` — список угроз с фильтрами (это и есть переключатель "Украина / Мир" на фронтенде — просто параметр `region`)
-- `GET /timeline/{cve_id}` — Cyber Timeline: хронология жизни угрозы (публикация → PoC → KEV) + rule-based вердикт о скорости эксплуатации
-- `GET /threats/{id}` — детали одной угрозы
-- `GET /health` — проверка живости
-
-## Cyber Timeline
-
-Склеивает записи из разных источников с одинаковым `cve_id` в хронологию:
-публикация в NVD → первый PoC на GitHub → готовый эксплойт на Exploit-DB →
-попадание в CISA KEV. Считает `days_to_poc` / `days_to_kev` и генерирует
-rule-based вердикт о скорости эксплуатации (не AI — эвристика по времени
-между событиями; на Этапе 5 это место естественно заменяется на LLM).
-
-На фронтенде: клик по CVE-id в таблице угроз → `/timeline/{cve}`.
-
-## Автообновление без своего сервера
-
-`.github/workflows/collect.yml` запускает `python -m app.pipeline` по расписанию
-(cron) прямо в GitHub Actions — бесплатно, без VPS. По умолчанию — раз в час,
-для "раз в день" поменяй `cron: "0 * * * *"` на `cron: "0 6 * * *"`.
-
-Два варианта хранения БД:
-1. **SQLite в репозитории** (проще всего для MVP) — workflow сам коммитит
-   обновлённый `data/threats.db` обратно в репо.
-2. **Внешняя PostgreSQL** (Supabase/Neon free tier) — задай `DATABASE_URL` в
-   GitHub Secrets, тогда шаг коммита БД пропускается автоматически.
-
-## Быстрый старт (фронтенд)
+## Швидкий старт (фронтенд)
 
 ```bash
 cd frontend
 npm install
-cp .env.local.example .env.local   # NEXT_PUBLIC_API_URL=http://localhost:8000
+cp .env.local.example .env.local   # NEXT_PUBLIC_API_URL=<адреса бекенда>
 npm run dev
 # → http://localhost:3000
 ```
 
-Если бэкенд не запущен, фронтенд честно покажет баннер и демо-данные —
-не упадёт с пустым экраном.
+Якщо бекенд недоступний, фронтенд чесно покаже банер і демо-дані —
+не впаде з порожнім екраном.
 
-## Дорожная карта
+⚠️ **Про cold start:** бекенд на Render (free tier) засинає після ~15 хв
+без запитів, перший запит після сну може займати до 50 секунд — саме
+тому іноді на дашборді можна побачити "Бекенд недоступний — показано
+демо-дані" при першому заході.
 
-- [x] Этап 1-3: коллекторы, единая модель, БД, API
-- [x] Расширение: 10 источников (UA + World), CVSS/EPSS/exploit maturity, переключатель region
-- [x] Этап 4: дашборд на Next.js — KPI-плашки, топ-вендоров, таблица угроз, UA/World toggle, пульс-линия активности
-- [ ] Проверить и поправить селекторы `registry.py` для кіберполіції и SSSCIP
-- [ ] Этап 5: AI-суммаризация через OpenAI API (`/threats/{id}/explain`)
-- [x] Cyber Timeline: склейка published → poc_published → added_to_kev по CVE, страница /timeline/{cve} на фронтенде
-- [ ] Этап 5: AI-суммаризация через OpenAI API (заменит rule-based вердикт в Cyber Timeline на LLM)
-- [ ] Telegram-бот с критическими оповещениями
-- [ ] Почасовая статистика в `/stats` для реальной пульс-линии (сейчас на фронте демо-волна)
+## Ендпоінти
+
+- `GET /stats?region=UA|World` — зведення для плашок: Critical, Active Exploits, New CVE 24h, UA Alerts, High EPSS Risk, Top Vendors, By Source
+- `GET /threats?source=&severity=&region=&type=&days=&limit=` — список загроз з фільтрами
+- `GET /timeline/{cve_id}` — Cyber Timeline: хронологія життя загрози + вердикт про швидкість експлуатації
+- `GET /threats/{id}` — деталі однієї загрози
+- `GET /threats/{id}/explain` — AI-пояснення загрози та рекомендації
+- `GET /health` — перевірка живості
+
+## Змінні середовища
+
+```bash
+DATABASE_URL= # PostgreSQL connection string (Neon)
+NVD_API_KEY=
+GITHUB_TOKEN=
+ABUSECH_AUTH_KEY=
+OTX_API_KEY=
+N8N_WEBHOOK_URL= # webhook n8n для автопублікації в Telegram
+```
+## Розгортання (як задеплоєно зараз)
+
+| Компонент | Платформа | Тариф |
+|---|---|---|
+| Backend (FastAPI) | Render | Free |
+| Database (PostgreSQL) | Neon | Free |
+| Frontend (Next.js) | Vercel | Free (Hobby) |
+| Автозбір даних (cron) | GitHub Actions | Free |
+| AI Automation → Telegram | n8n (self-hosted) | — |
+
+## Дорожня карта
+
+- [x] Колектори, єдина модель, БД, API
+- [x] 10 джерел (UA + Світ), CVSS/EPSS/exploit maturity, перемикач region
+- [x] Дашборд на Next.js
+- [x] Cyber Timeline
+- [x] Деплой бекенда на Render + Neon, фронтенда на Vercel
+- [x] AI Automation через n8n: автоматичні зведення в Telegram
+- [ ] Перевірити стабільність скраперів для СБУ (залежить від верстки сайту)
+- [ ] Розширити AI-сумаризацію (`/threats/{id}/explain`)
+- [ ] Погодинна статистика в `/stats` для реальної пульс-лінії (зараз демо-хвиля)
+- [ ] Upgrade на платний тариф Render для усунення cold start
 
 ## Стек
 
-Python 3.12 · FastAPI · SQLAlchemy · SQLite/PostgreSQL · GitHub Actions (cron) ·
-далее — Next.js + Recharts для фронтенда
+Python 3.12 · FastAPI · SQLAlchemy · PostgreSQL (Neon) · GitHub Actions (cron) ·
+Next.js · Recharts · n8n · Groq / SerpAPI
+
