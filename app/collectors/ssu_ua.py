@@ -1,12 +1,12 @@
 """
-Headless-коллектор новин СБУ (ssu.gov.ua/novyny) з фільтрацією за
-кібербезпековими ключовими словами.
+Headless-колектор новин СБУ (ssu.gov.ua/novyny) з фільтрацією за
+кіберпов'язаними ключовими словами.
 
-ssu.gov.ua віддає 403 при звичайному requests (бот-захист), тому
-використовуємо Playwright для рендерингу сторінки у реальному браузері.
+ssu.gov.ua віддає Access Denied через Akamai bot-захист, тому
+використовуємо Playwright + playwright-stealth для обходу.
 
 Вимоги:
-  pip install playwright
+  pip install playwright playwright-stealth
   playwright install chromium
 """
 import logging
@@ -27,7 +27,6 @@ CYBER_KEYWORDS = [
     "шпигун", "розвідка", "ботнет", "вірус", "шкідливе", "malware",
 ]
 
-# Exclude non-threat content (competitions, CTFs, education events)
 EXCLUDE_KEYWORDS = [
     "ctf", "shehack", "конкурс", "змагання", "соревнован",
     "challenge", "чемпіонат", "першість", "турнір", "хакатон", "hackathon",
@@ -37,7 +36,6 @@ EXCLUDE_KEYWORDS = [
 
 def _matches_cyber(title: str, summary: str) -> bool:
     text = f"{title} {summary}".lower()
-    # Exclude non-threat content (CTF, competitions, etc.)
     if any(kw in text for kw in EXCLUDE_KEYWORDS):
         return False
     return any(kw in text for kw in CYBER_KEYWORDS)
@@ -61,17 +59,17 @@ class SSUCollector(BaseCollector):
     def fetch(self) -> list[Threat]:
         try:
             from playwright.sync_api import sync_playwright
+            from playwright_stealth import Stealth
         except ImportError:
             logger.warning(
-                "Playwright не встановлено — СБУ пропущено. "
-                "Для обходу бот-захисту ssu.gov.ua встанови: "
-                "pip install playwright && playwright install chromium"
+                "Playwright/playwright-stealth не встановлено — СБУ пропущено. "
+                "pip install playwright playwright-stealth && playwright install chromium"
             )
             return []
 
         threats: list[Threat] = []
         try:
-            with sync_playwright() as p:
+            with Stealth().use_sync(sync_playwright()) as p:
                 browser = p.chromium.launch(headless=True)
                 context = browser.new_context(
                     user_agent=(
@@ -82,64 +80,53 @@ class SSUCollector(BaseCollector):
                 )
                 page = context.new_page()
                 page.goto(SSU_NEWS_URL, wait_until="networkidle", timeout=60000)
+                page.wait_for_timeout(3000)
 
-                # SSU, як і більшість сайтів, має карточки новин з посиланнями
-                links = page.locator("article a, .news-item a, .item-news a, .post a, .news-card a").all()
-                if not links:
-                    links = page.locator("a[href*='/novyny/']").all()
+                # .news-title цепляет и <a class="news-title">, и <h2 class="news-title">
+                # (внутри <a class="big-preview">) — картиночные "пустые" ссылки без текста
+                # этот класс не имеют, дублей не будет.
+                title_elements = page.locator(".news-title").all()
+                logger.info("SSU: found %d news-title elements", len(title_elements))
 
-                seen = set()
-                for link in links[:40]:
-                    title = (link.text_content() or "").strip()
-                    href = link.get_attribute("href") or ""
-                    if not title or len(title) < 10 or not href:
+                seen_hrefs = set()
+                for el in title_elements[:40]:
+                    title = (el.text_content() or "").strip()
+                    if not title or len(title) < 10:
                         continue
 
-                    url = urljoin(SSU_NEWS_URL, href)
-                    if url in seen:
+                    tag_name = el.evaluate("e => e.tagName.toLowerCase()")
+                    href = ""
+                    date_text = ""
+                    try:
+                        if tag_name == "a":
+                            href = el.get_attribute("href") or ""
+                        else:
+                            anchor = el.locator("xpath=ancestor::a[1]")
+                            href = anchor.get_attribute("href") or ""
+                            date_el = anchor.locator(".news-date").first
+                            date_text = date_el.text_content() or ""
+                    except Exception:
+                        pass
+
+                    if not href or href in seen_hrefs:
                         continue
-                    seen.add(url)
+                    seen_hrefs.add(href)
 
                     if not _matches_cyber(title, ""):
                         continue
 
-                    # Пробуємо отримати дату з карточки або сторінки
-                    published = datetime.utcnow()
-                    try:
-                        parent = link.locator("..").first
-                        date_text = ""
-                        for sel in ".date, .published, time, [class*='date']":
-                            date_els = parent.locator(sel).all()
-                            if date_els:
-                                date_text = date_els[0].text_content() or ""
-                                break
-                        if not date_text:
-                            # шукаємо дату у батьківських елементах
-                            for i in range(3):
-                                parent = parent.locator("..").first
-                                for sel in ".date, .published, time, [class*='date']":
-                                    date_els = parent.locator(sel).all()
-                                    if date_els:
-                                        date_text = date_els[0].text_content() or ""
-                                        break
-                                if date_text:
-                                    break
-                        published = _parse_date(date_text)
-                    except Exception:
-                        pass
-
                     threats.append(
                         Threat(
-                            external_id=url,
+                            external_id=href,
                             title=title,
                             source=self.source_name,
                             type=ThreatType.news,
                             severity=Severity.high,
                             region=Region.ua,
-                            published=published,
+                            published=_parse_date(date_text),
                             summary="",
                             tags=["Ukraine", "SBU", "cyber"],
-                            url=url,
+                            url=urljoin(SSU_NEWS_URL, href),
                         )
                     )
 

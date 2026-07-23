@@ -52,3 +52,8 @@ coverage/
 *.bak
 *.tmp
 .cache
+
+debug_*.py
+debug_*.txt
+debug_*.png
+data/debug_*

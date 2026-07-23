@@ -1,14 +1,11 @@
 """
-Headless-коллектор для сайту Держспецзв'язку (SSSCIP / cip.gov.ua).
-cip.gov.ua віддає 403 при звичайному requests (бот-захист Cloudflare),
-тому використовуємо Playwright для рендерингу сторінки у реальному браузері.
+Headless-колектор для сайту Держспецзв'язку (SSSCIP / cip.gov.ua).
+cip.gov.ua віддає Access Denied через Akamai bot-захист, тому використовуємо
+Playwright + playwright-stealth для обходу.
 
 Вимоги:
-  pip install playwright
+  pip install playwright playwright-stealth
   playwright install chromium
-
-Якщо Playwright не встановлено — колектор логує інструкцію і повертає пустий
-список, не падаючи.
 """
 import logging
 from datetime import datetime
@@ -26,7 +23,7 @@ def _parse_date(text: str | None) -> datetime:
     if not text:
         return datetime.utcnow()
     text = text.strip()
-    for fmt in ("%d.%m.%Y", "%d.%m.%Y %H:%M", "%Y-%m-%d", "%Y-%m-%d %H:%M:%S"):
+    for fmt in ("%d.%m.%Y %H:%M", "%d.%m.%Y", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
         try:
             return datetime.strptime(text, fmt)
         except ValueError:
@@ -40,17 +37,17 @@ class SSSCIPCollector(BaseCollector):
     def fetch(self) -> list[Threat]:
         try:
             from playwright.sync_api import sync_playwright
+            from playwright_stealth import Stealth
         except ImportError:
             logger.warning(
-                "Playwright не встановлено — SSSCIP пропущено. "
-                "Для обходу бот-захисту cip.gov.ua встанови: "
-                "pip install playwright && playwright install chromium"
+                "Playwright/playwright-stealth не встановлено — SSSCIP пропущено. "
+                "pip install playwright playwright-stealth && playwright install chromium"
             )
             return []
 
         threats: list[Threat] = []
         try:
-            with sync_playwright() as p:
+            with Stealth().use_sync(sync_playwright()) as p:
                 browser = p.chromium.launch(headless=True)
                 context = browser.new_context(
                     user_agent=(
@@ -61,60 +58,46 @@ class SSSCIPCollector(BaseCollector):
                 )
                 page = context.new_page()
                 page.goto(SSSCIP_NEWS_URL, wait_until="networkidle", timeout=60000)
+                page.wait_for_timeout(3000)
 
-                # Шукаємо типові елементи новин: заголовки з посиланнями
-                # Селектори — універсальні, оскільки точна структура може змінюватися
-                items = page.locator("article, .news-item, .news-card, [class*='news']").all()
-                if not items:
-                    # fallback — будь-які посилання, що містять 'news' в URL
-                    links = page.locator("a[href*='/news/']").all()
-                    for link in links[:20]:
-                        title = (link.text_content() or "").strip()
-                        href = link.get_attribute("href") or ""
-                        if not title or len(title) < 10:
-                            continue
-                        threats.append(
-                            Threat(
-                                external_id=href,
-                                title=title,
-                                source=self.source_name,
-                                type=ThreatType.news,
-                                severity=Severity.medium,
-                                region=Region.ua,
-                                published=datetime.utcnow(),
-                                summary="",
-                                tags=["Ukraine", "SSSCIP"],
-                                url=urljoin(SSSCIP_NEWS_URL, href),
-                            )
-                        )
-                else:
-                    for item in items[:20]:
-                        title_el = item.locator("h2, h3, .title, a").first
-                        title = (title_el.text_content() or "").strip()
-                        href = title_el.get_attribute("href") or ""
-                        if not title or len(title) < 10:
-                            continue
-                        date_text = ""
-                        for sel in ".date, .published, time, [class*='date']":
-                            date_els = item.locator(sel).all()
-                            if date_els:
-                                date_text = date_els[0].text_content() or ""
-                                break
+                # Точный селектор по реальной вёрстке (Angular, class="article-title")
+                titles = page.locator("h3.article-title").all()
+                logger.info("SSSCIP: found %d article-title elements", len(titles))
 
-                        threats.append(
-                            Threat(
-                                external_id=href or title,
-                                title=title,
-                                source=self.source_name,
-                                type=ThreatType.news,
-                                severity=Severity.medium,
-                                region=Region.ua,
-                                published=_parse_date(date_text),
-                                summary="",
-                                tags=["Ukraine", "SSSCIP"],
-                                url=urljoin(SSSCIP_NEWS_URL, href) if href else None,
-                            )
+                for title_el in titles[:20]:
+                    title = (title_el.text_content() or "").strip()
+                    if not title:
+                        continue
+
+                    href = ""
+                    try:
+                        anchor = title_el.locator("xpath=ancestor::a[1]")
+                        href = anchor.get_attribute("href") or ""
+                    except Exception:
+                        pass
+
+                    date_text = ""
+                    try:
+                        row = title_el.locator("xpath=ancestor::div[contains(@class,'row')][1]")
+                        date_el = row.locator(".date-tag").first
+                        date_text = date_el.text_content() or ""
+                    except Exception:
+                        pass
+
+                    threats.append(
+                        Threat(
+                            external_id=href or title,
+                            title=title,
+                            source=self.source_name,
+                            type=ThreatType.news,
+                            severity=Severity.medium,
+                            region=Region.ua,
+                            published=_parse_date(date_text),
+                            summary="",
+                            tags=["Ukraine", "SSSCIP"],
+                            url=urljoin(SSSCIP_NEWS_URL, href) if href else None,
                         )
+                    )
 
                 browser.close()
         except Exception as e:
