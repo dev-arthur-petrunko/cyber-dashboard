@@ -138,7 +138,7 @@ N8N_WEBHOOK_URL= # webhook n8n для автопублікації в Telegram
 | Database (PostgreSQL) | Neon | Free |
 | Frontend (Next.js) | Vercel | Free (Hobby) |
 | Автозбір даних (cron) | GitHub Actions | Free |
-| AI Automation → Telegram | n8n (self-hosted) | — |
+| AI Automation → Telegram | n8n (self-hosted) | Free |
 
 ## Дорожня карта
 
