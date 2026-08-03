@@ -59,7 +59,7 @@ class AlienVaultOTXCollector(BaseCollector):
                     OTX_API_URL,
                     params={"q": query, "limit": 10},
                     headers=headers,
-                    timeout=30,
+                    timeout=(10, 20),
                 )
                 resp.raise_for_status()
             except requests.RequestException as e:

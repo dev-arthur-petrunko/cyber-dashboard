@@ -2,6 +2,9 @@ import { Stats, Threat, Region, Timeline, Severity, ExploitMaturity } from "./ty
 import curatedRaw from "../../data/curated_threats.json";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// Render free tier може прокидатися до хвилини. Ліміт у 2 секунди завжди
+// показував демо-дані після простою, хоча API вже завантажував актуальні дані.
+const API_TIMEOUT_MS = 55_000;
 
 type CuratedItem = {
   title: string;
@@ -69,15 +72,16 @@ const DEMO_THREATS: Threat[] = [...CURATED_THREATS].sort(
 );
 
 async function safeFetch<T>(path: string, fallback: T): Promise<{ data: T; isDemo: boolean }> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
     const res = await fetch(`${API_URL}${path}`, { cache: "no-store", signal: controller.signal });
-    clearTimeout(timeoutId);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return { data: await res.json(), isDemo: false };
   } catch {
     return { data: fallback, isDemo: true };
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 

@@ -79,7 +79,17 @@ class SSUCollector(BaseCollector):
                     viewport={"width": 1280, "height": 800},
                 )
                 page = context.new_page()
-                page.goto(SSU_NEWS_URL, wait_until="networkidle", timeout=60000)
+                # ``networkidle`` на сайті з Akamai іноді не настає через фонові
+                # запити. DOM достатній для заголовків; повтор спрацьовує при
+                # короткочасних DNS-збоях.
+                for attempt in range(2):
+                    try:
+                        page.goto(SSU_NEWS_URL, wait_until="domcontentloaded", timeout=60000)
+                        break
+                    except Exception:
+                        if attempt == 1:
+                            raise
+                        page.wait_for_timeout(1500)
                 page.wait_for_timeout(3000)
 
                 # .news-title цепляет и <a class="news-title">, и <h2 class="news-title">

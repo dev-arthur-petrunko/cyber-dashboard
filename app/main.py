@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.db import ThreatORM, get_session, init_db
 from app.timeline import build_timeline
+from app.attack import search_groups
 from app.explanation import generate_explanation
 from app.models.threat import Threat
 
@@ -46,6 +47,18 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/threat-actors")
+def list_threat_actors(
+    search: Optional[str] = None,
+    limit: int = Query(default=50, ge=1, le=100),
+):
+    """Групи MITRE ATT&CK, їхні псевдоніми та відомі техніки."""
+    try:
+        return {"items": search_groups(search, limit)}
+    except Exception as error:
+        return {"items": [], "error": f"MITRE ATT&CK недоступний: {error}"}
 
 
 @app.get("/threats")

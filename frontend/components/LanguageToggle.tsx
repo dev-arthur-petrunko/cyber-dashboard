@@ -3,25 +3,34 @@
 import { useTranslation } from "./LanguageContext";
 
 export function LanguageToggle() {
-  const { lang, setLang, t } = useTranslation();
+  const { lang, setLang } = useTranslation();
 
-  const toggle = () => {
-    setLang(lang === "uk" ? "en" : "uk");
-  };
+  const languages = [
+    { code: "uk", label: "Українська" },
+    { code: "en", label: "English" },
+    { code: "pl", label: "Polski" },
+    { code: "fr", label: "Français" },
+    { code: "de", label: "Deutsch" },
+  ] as const;
 
   return (
-    <button
-      onClick={toggle}
-      className="group relative flex h-7 items-center gap-1 rounded-lg border border-border bg-panel px-2 hover:bg-panel-raised transition-all sm:h-9 sm:gap-1.5 sm:px-3"
-      aria-label={lang === "uk" ? "Switch to English" : "Переключити на українську"}
+    <label
+      className="relative flex h-7 items-center rounded-lg border border-border bg-panel px-2 text-text-secondary transition-colors hover:border-signal/40 sm:h-9 sm:px-3"
+      aria-label="Language"
     >
-      <span className={`text-xs font-bold transition-colors sm:text-sm ${lang === "uk" ? "text-ua-blue" : "text-text-muted"}`}>
-        UK
-      </span>
-      <span className="h-3 w-px bg-border sm:h-4" />
-      <span className={`text-xs font-bold transition-colors sm:text-sm ${lang === "en" ? "text-signal" : "text-text-muted"}`}>
-        EN
-      </span>
-    </button>
+      <span className="sr-only">Language</span>
+      <select
+        value={lang}
+        onChange={(event) => setLang(event.target.value as typeof lang)}
+        className="max-w-20 cursor-pointer appearance-none bg-transparent pr-3 text-xs font-bold outline-none sm:max-w-none sm:text-sm"
+      >
+        {languages.map((language) => (
+          <option key={language.code} value={language.code}>{language.label}</option>
+        ))}
+      </select>
+      <svg className="pointer-events-none absolute right-2 h-3 w-3 sm:right-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
+      </svg>
+    </label>
   );
 }

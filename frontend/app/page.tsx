@@ -24,6 +24,7 @@ export default function DashboardPage() {
   const [isDemo, setIsDemo] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,7 +37,9 @@ export default function DashboardPage() {
       setLoading(false);
     });
     return () => { cancelled = true; };
-  }, [region]);
+  }, [region, refreshKey]);
+
+  const lastUpdate = stats?.last_update ? formatLastUpdate(stats.last_update) : t.sections.loading;
 
   const severityBreakdown = threats.reduce<Record<string, number>>((acc, t) => {
     acc[t.severity] = (acc[t.severity] ?? 0) + 1;
@@ -75,9 +78,14 @@ export default function DashboardPage() {
               <h1 className="font-mono text-sm font-black tracking-tight text-text-primary sm:text-lg lg:text-xl">
                 UA CYBER THREAT
               </h1>
-              <p className="truncate text-[11px] text-text-secondary sm:text-sm">
-                {stats?.total_threats ?? "—"} {t.header.records}
-              </p>
+              <div className="flex items-center gap-2 text-[11px] text-text-secondary sm:text-sm">
+                <span>{stats?.total_threats ?? "—"} {t.header.records}</span>
+                <span className="hidden h-3 w-px bg-border sm:block" />
+                <span className="hidden items-center gap-1.5 sm:inline-flex" title={stats?.last_update ?? undefined}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${isDemo ? "bg-warning" : "bg-signal"}`} />
+                  {isDemo ? t.header.demoWarning : lastUpdate}
+                </span>
+              </div>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-3">
@@ -91,6 +99,18 @@ export default function DashboardPage() {
               </svg>
               <span className="hidden sm:inline">{t.header.sources}</span>
             </Link>
+            <button
+              type="button"
+              onClick={() => setRefreshKey((value) => value + 1)}
+              className="inline-flex items-center gap-1 rounded-lg border border-border bg-panel px-2 py-1.5 text-[11px] font-medium text-text-secondary shadow-sm transition-[border-color,color,transform] duration-150 active:scale-[0.97] hover:border-signal/40 hover:text-signal sm:px-3 sm:py-2 sm:text-sm"
+              aria-label="Refresh dashboard data"
+              title="Refresh dashboard data"
+            >
+              <svg className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""} sm:h-4 sm:w-4`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
             <LanguageToggle />
             <ThemeToggle />
           </div>
@@ -247,6 +267,12 @@ export default function DashboardPage() {
       </div>
     </main>
   );
+}
+
+function formatLastUpdate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Sync status unavailable";
+  return `Synced ${new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit" }).format(date)}`;
 }
 
 function DetailCard({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {

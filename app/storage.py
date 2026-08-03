@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy.orm import Session
 
 from app.db import ThreatORM
@@ -10,7 +12,34 @@ def bulk_upsert(db: Session, threats: list[Threat]) -> dict:
     запись. Критично для удалённой БД (Neon/Postgres): 1600 записей по
     отдельности над сетью могут занимать 10+ минут, пачкой — секунды."""
     if not threats:
-        return {"inserted": 0, "updated": 0, "total": 0}
+        return {"inserted": 0, "updated": 0, "skipped_duplicates": 0, "skipped_invalid": 0, "total": 0}
+
+    # Обмеження БД захищає між запусками, а ця перевірка — відповідь одного
+    # колектора. Без неї два дублікати з однієї пачки плануються на INSERT і
+    # можуть зірвати всю транзакцію до перевірки унікальності PostgreSQL.
+    unique_threats: dict[tuple[str, str], Threat] = {}
+    skipped_duplicates = 0
+    skipped_invalid = 0
+    for threat in threats:
+        external_id = threat.external_id.strip()
+        if not external_id:
+            skipped_invalid += 1
+            continue
+
+        key = (threat.source, external_id)
+        if key in unique_threats:
+            skipped_duplicates += 1
+        unique_threats[key] = threat.model_copy(update={"external_id": external_id})
+
+    threats = list(unique_threats.values())
+    if not threats:
+        return {
+            "inserted": 0,
+            "updated": 0,
+            "skipped_duplicates": skipped_duplicates,
+            "skipped_invalid": skipped_invalid,
+            "total": 0,
+        }
 
     sources = {t.source for t in threats}
     external_ids = {t.external_id for t in threats}
@@ -28,10 +57,14 @@ def bulk_upsert(db: Session, threats: list[Threat]) -> dict:
     )
     existing_map = {(r.source, r.external_id): r for r in existing_rows}
 
+    # ``fetched_at`` — операційна метадані, а не дані джерела. Оновлюємо поле
+    # під час кожного успішного збору, щоб /stats та n8n показували актуальність.
+    fetched_at = datetime.utcnow()
     inserted, updated = 0, 0
     for t in threats:
         key = (t.source, t.external_id)
         data = t.model_dump(exclude={"fetched_at"})
+        data["fetched_at"] = fetched_at
         # url приходит как HttpUrl -> приводим к строке
         if data.get("url") is not None:
             data["url"] = str(data["url"])
@@ -46,4 +79,10 @@ def bulk_upsert(db: Session, threats: list[Threat]) -> dict:
             inserted += 1
 
     db.commit()  # один коммит на всю пачку
-    return {"inserted": inserted, "updated": updated, "total": len(threats)}
+    return {
+        "inserted": inserted,
+        "updated": updated,
+        "skipped_duplicates": skipped_duplicates,
+        "skipped_invalid": skipped_invalid,
+        "total": len(threats),
+    }

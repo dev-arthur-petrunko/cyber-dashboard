@@ -12,7 +12,15 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 DATABASE_URL = os.getenv("DATABASE_URL") or "sqlite:///./data/threats.db"
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
-engine = create_engine(DATABASE_URL, connect_args=connect_args)
+# Воркер Render може лишатися активним, коли Neon закриває неактивне з'єднання.
+# Перевірка перед повторним використанням усуває періодичні 500 після простою
+# та дозволяє SQLAlchemy автоматично перепідключитися.
+engine = create_engine(
+    DATABASE_URL,
+    connect_args=connect_args,
+    pool_pre_ping=True,
+    pool_recycle=300,
+)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()
 

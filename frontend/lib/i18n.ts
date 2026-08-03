@@ -1,4 +1,4 @@
-export type Language = "uk" | "en";
+export type Language = "uk" | "en" | "pl" | "fr" | "de";
 
 export const translations = {
   uk: {
@@ -184,6 +184,45 @@ export const translations = {
       error: "Failed to load explanation",
       viewSource: "View source",
     },
+  },
+  pl: {
+    header: { title: "UA CYBER THREAT", records: "rekordów w bazie", sources: "Źródła", demoWarning: "Backend jest niedostępny — wyświetlane są dane demonstracyjne." },
+    stats: { critical: "Krytyczne", active: "Aktywne", new24h: "Nowe 24 h", uaAlerts: "Alerty UA", epssRisk: "Ryzyko EPSS", highSeverity: "Wysokie/Krytyczne" },
+    region: { all: "Wszystkie", ukraine: "Ukraina", world: "Świat" },
+    sections: { bySource: "Według źródła", topVendors: "Najwięksi dostawcy", details: "Szczegóły", latestThreats: "Najnowsze zagrożenia", severity: "Według ważności", exploitStatus: "Status exploitów", recentThreats: "Ostatnie zagrożenia", loading: "Ładowanie…", noThreats: "Brak zagrożeń dla wybranego okresu i filtra.", tryFilter: "Zmień region lub uruchom zbieranie danych." },
+    exploitStatus: { inTheWild: "W trakcie ataków", weaponized: "Gotowy exploit", poc: "PoC dostępny", unknown: "Nieznany" },
+    severity: { Critical: "Krytyczne", High: "Wysokie", Medium: "Średnie", Low: "Niskie", Unknown: "Nieznane" },
+    table: { source: "Źródło", threat: "Zagrożenie", vendor: "Dostawca", severity: "Ważn.", cvss: "CVSS", status: "Status", when: "Kiedy", showTimeline: "Pokaż oś zagrożenia" },
+    sources: { title: "Źródła danych", subtitle: "Lista źródeł, z których zbierane są zagrożenia, oraz źródeł jeszcze niezintegrowanych z powodu ograniczeń technicznych.", telemetry: "Telemetria i wskaźniki (API)", vendorRSS: "Analizy dostawców (RSS)", integrated: "Zintegrowane źródła ukraińskie", planned: "Znane, lecz jeszcze niezintegrowane", telegram: "Kanały Telegram", backToDashboard: "Wróć do dashboardu", problem: "Problem:", solution: "Możliwe rozwiązanie:", keyRequired: "Wymagany klucz:", docs: "Dokumentacja", active: "Aktywne", partial: "Częściowe", statusPlanned: "Planowane", footer: "UA Cyber Threat Dashboard · Dane są automatycznie aktualizowane ze zintegrowanych źródeł" },
+    timeline: { title: "Oś rozwoju zagrożenia", demoWarning: "Backend jest niedostępny lub CVE nie znaleziono w prawdziwej bazie — wyświetlany jest przykład demonstracyjny.", loading: "Ładowanie…", backToDashboard: "Wróć do dashboardu" },
+    theme: { light: "Jasny", dark: "Ciemny" },
+    explain: { whatIs: "Co to jest?", risk: "Ryzyko", recommendations: "Rekomendacje", loading: "Ładowanie wyjaśnienia…", error: "Nie udało się załadować wyjaśnienia", viewSource: "Zobacz źródło" },
+  },
+  fr: {
+    header: { title: "UA CYBER THREAT", records: "enregistrements dans la base", sources: "Sources", demoWarning: "Le backend est indisponible — les données de démonstration sont affichées." },
+    stats: { critical: "Critiques", active: "Actifs", new24h: "Nouveaux 24 h", uaAlerts: "Alertes UA", epssRisk: "Risque EPSS", highSeverity: "Élevé/Critique" },
+    region: { all: "Tous", ukraine: "Ukraine", world: "Monde" },
+    sections: { bySource: "Par source", topVendors: "Principaux fournisseurs", details: "Plus de détails", latestThreats: "Dernières menaces", severity: "Par gravité", exploitStatus: "Statut des exploits", recentThreats: "Menaces récentes", loading: "Chargement…", noThreats: "Aucune menace pour la période et le filtre sélectionnés.", tryFilter: "Essayez de modifier la région ou de lancer la collecte des données." },
+    exploitStatus: { inTheWild: "Exploité activement", weaponized: "Exploit prêt", poc: "PoC disponible", unknown: "Inconnu" },
+    severity: { Critical: "Critique", High: "Élevée", Medium: "Moyenne", Low: "Faible", Unknown: "Inconnue" },
+    table: { source: "Source", threat: "Menace", vendor: "Fournisseur", severity: "Grav.", cvss: "CVSS", status: "Statut", when: "Date", showTimeline: "Afficher la chronologie" },
+    sources: { title: "Sources de données", subtitle: "Liste des sources dont les menaces sont collectées, ainsi que des sources non encore intégrées en raison de contraintes techniques.", telemetry: "Télémétrie et indicateurs (API)", vendorRSS: "Analyses des fournisseurs (RSS)", integrated: "Sources ukrainiennes intégrées", planned: "Connues mais non encore intégrées", telegram: "Canaux Telegram", backToDashboard: "Retour au tableau de bord", problem: "Problème :", solution: "Solution possible :", keyRequired: "Clé requise :", docs: "Documentation", active: "Actif", partial: "Partiel", statusPlanned: "Prévu", footer: "UA Cyber Threat Dashboard · Les données sont mises à jour automatiquement depuis les sources intégrées" },
+    timeline: { title: "Chronologie de l'évolution de la menace", demoWarning: "Le backend est indisponible ou le CVE est introuvable dans la base réelle — exemple de démonstration affiché.", loading: "Chargement…", backToDashboard: "Retour au tableau de bord" },
+    theme: { light: "Clair", dark: "Sombre" },
+    explain: { whatIs: "Qu'est-ce que c'est ?", risk: "Risque", recommendations: "Recommandations", loading: "Chargement de l'explication…", error: "Impossible de charger l'explication", viewSource: "Voir la source" },
+  },
+  de: {
+    header: { title: "UA CYBER THREAT", records: "Einträge in der Datenbank", sources: "Quellen", demoWarning: "Backend nicht verfügbar — Demo-Daten werden angezeigt." },
+    stats: { critical: "Kritisch", active: "Aktiv", new24h: "Neu 24 Std.", uaAlerts: "UA-Warnungen", epssRisk: "EPSS-Risiko", highSeverity: "Hoch/Kritisch" },
+    region: { all: "Alle", ukraine: "Ukraine", world: "Welt" },
+    sections: { bySource: "Nach Quelle", topVendors: "Top-Anbieter", details: "Details", latestThreats: "Neueste Bedrohungen", severity: "Nach Schweregrad", exploitStatus: "Exploit-Status", recentThreats: "Aktuelle Bedrohungen", loading: "Wird geladen…", noThreats: "Keine Bedrohungen für den ausgewählten Zeitraum und Filter.", tryFilter: "Ändern Sie die Region oder starten Sie die Datensammlung." },
+    exploitStatus: { inTheWild: "Aktiv ausgenutzt", weaponized: "Funktionsfähiger Exploit", poc: "PoC verfügbar", unknown: "Unbekannt" },
+    severity: { Critical: "Kritisch", High: "Hoch", Medium: "Mittel", Low: "Niedrig", Unknown: "Unbekannt" },
+    table: { source: "Quelle", threat: "Bedrohung", vendor: "Anbieter", severity: "Schwere", cvss: "CVSS", status: "Status", when: "Wann", showTimeline: "Bedrohungs-Zeitleiste anzeigen" },
+    sources: { title: "Datenquellen", subtitle: "Liste der Quellen, aus denen Bedrohungen gesammelt werden, sowie noch nicht integrierter Quellen aufgrund technischer Einschränkungen.", telemetry: "Telemetrie und Indikatoren (API)", vendorRSS: "Anbieteranalysen (RSS)", integrated: "Integrierte ukrainische Quellen", planned: "Bekannt, aber noch nicht integriert", telegram: "Telegram-Kanäle", backToDashboard: "Zum Dashboard", problem: "Problem:", solution: "Mögliche Lösung:", keyRequired: "Schlüssel erforderlich:", docs: "Dokumentation", active: "Aktiv", partial: "Teilweise", statusPlanned: "Geplant", footer: "UA Cyber Threat Dashboard · Daten werden automatisch aus integrierten Quellen aktualisiert" },
+    timeline: { title: "Zeitlicher Verlauf der Bedrohung", demoWarning: "Backend nicht verfügbar oder CVE wurde nicht in der echten Datenbank gefunden — Demo-Beispiel wird angezeigt.", loading: "Wird geladen…", backToDashboard: "Zum Dashboard" },
+    theme: { light: "Hell", dark: "Dunkel" },
+    explain: { whatIs: "Was ist das?", risk: "Risiko", recommendations: "Empfehlungen", loading: "Erklärung wird geladen…", error: "Erklärung konnte nicht geladen werden", viewSource: "Quelle anzeigen" },
   },
 } as const;
 
