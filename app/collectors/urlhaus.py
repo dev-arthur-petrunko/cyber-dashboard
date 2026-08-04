@@ -2,6 +2,7 @@
 import logging
 import os
 from datetime import datetime
+from urllib.parse import urlparse
 
 import requests
 
@@ -29,9 +30,24 @@ class URLhausCollector(BaseCollector):
                 headers={"User-Agent": "UA-Cyber-Dashboard"},
             )
             response.raise_for_status()
-            records = response.json()
-        except (requests.RequestException, ValueError) as error:
-            logger.error("URLhaus недоступний: %s", error)
+            payload = response.json()
+        except requests.RequestException as error:
+            # Не логируем error целиком — requests часто включает в текст
+            # исключения полный URL запроса, а значит и auth_key.
+            status = getattr(getattr(error, "response", None), "status_code", "?")
+            logger.error("URLhaus недоступний: HTTP %s", status)
+            return []
+        except ValueError:
+            logger.error("URLhaus повернув невалідний JSON")
+            return []
+
+        # Дамп может прийти как голый список ИЛИ как {"query_status": ..., "urls": [...]}
+        if isinstance(payload, dict):
+            records = payload.get("urls") or payload.get("data") or []
+        elif isinstance(payload, list):
+            records = payload
+        else:
+            logger.error("URLhaus: неочікуваний формат відповіді (%s)", type(payload).__name__)
             return []
 
         threats: list[Threat] = []
@@ -40,7 +56,10 @@ class URLhausCollector(BaseCollector):
             url_id = str(record.get("id") or url or "")
             if not url or not url_id:
                 continue
-            date_added = record.get("dateadded")
+
+            host = record.get("host") or urlparse(url).netloc or url
+
+            date_added = (record.get("dateadded") or record.get("date_added") or "").replace(" UTC", "")
             try:
                 published = datetime.strptime(date_added, "%Y-%m-%d %H:%M:%S")
             except (TypeError, ValueError):
@@ -49,7 +68,7 @@ class URLhausCollector(BaseCollector):
             threats.append(
                 Threat(
                     external_id=f"urlhaus-{url_id}",
-                    title=f"Malware URL: {record.get('host') or url}",
+                    title=f"Malware URL: {host}",
                     source=self.source_name,
                     type=ThreatType.ioc,
                     severity=Severity.high,
@@ -60,5 +79,6 @@ class URLhausCollector(BaseCollector):
                     url=url,
                 )
             )
+
         logger.info("URLhaus: %d шкідливих URL", len(threats))
         return threats
