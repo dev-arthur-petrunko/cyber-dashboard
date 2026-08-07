@@ -135,13 +135,18 @@ export async function fetchTimeline(cveId: string) {
   return safeFetch<Timeline>(`/timeline/${cveId}`, { ...DEMO_TIMELINE, cve_id: cveId });
 }
 
-export async function fetchThreats(region?: Region, limit = 25) {
+export type ThreatCategory = "feed" | "ioc" | "all";
+
+export async function fetchThreats(region?: Region, limit = 25, category: ThreatCategory = "all") {
   const qs = new URLSearchParams({
     limit: String(limit),
     days: "365",
     ...(region ? { region } : {}),
+    ...(category !== "all" ? { category } : {}),
   });
-  const filtered = region ? DEMO_THREATS.filter((t) => t.region === region) : DEMO_THREATS;
+  let filtered = region ? DEMO_THREATS.filter((t) => t.region === region) : DEMO_THREATS;
+  if (category === "feed") filtered = filtered.filter((t) => t.type !== "IOC");
+  if (category === "ioc") filtered = filtered.filter((t) => t.type === "IOC");
   return safeFetch<{ total: number; items: Threat[] }>(`/threats?${qs}`, {
     total: filtered.length,
     items: filtered.slice(0, limit),

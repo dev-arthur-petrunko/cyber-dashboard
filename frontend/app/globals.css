@@ -294,3 +294,16 @@
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-text-muted;
 }
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  @apply bg-border-strong rounded-full;
+}

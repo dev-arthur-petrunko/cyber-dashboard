@@ -72,6 +72,10 @@ def list_threats(
     days: int = Query(default=30, le=365),
     limit: int = Query(default=50, le=200),
     offset: int = 0,
+    category: Optional[str] = Query(
+        default=None,
+        description="feed — новини/CVE/advisory без IOC; ioc — тільки індикатори",
+    ),
 ):
     q = db.query(ThreatORM).filter(
         ThreatORM.published >= datetime.utcnow() - timedelta(days=days)
@@ -84,6 +88,10 @@ def list_threats(
         q = q.filter(ThreatORM.region == region)
     if type:
         q = q.filter(ThreatORM.type == type)
+    if category == "feed":
+        q = q.filter(ThreatORM.type != "IOC")
+    elif category == "ioc":
+        q = q.filter(ThreatORM.type == "IOC")
 
     total = q.count()
     rows = (

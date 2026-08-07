@@ -21,9 +21,11 @@ export default function DashboardPage() {
   const [region, setRegion] = useState<Region | undefined>(undefined);
   const [stats, setStats] = useState<Stats | null>(null);
   const [threats, setThreats] = useState<Threat[]>([]);
+  const [iocThreats, setIocThreats] = useState<Threat[]>([]);
   const [isDemo, setIsDemo] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
+  const [showIoc, setShowIoc] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [recentPage, setRecentPage] = useState(0);
 
@@ -34,11 +36,16 @@ export default function DashboardPage() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    Promise.all([fetchStats(region), fetchThreats(region, 50)]).then(([s, t]) => {
+    Promise.all([
+      fetchStats(region),
+      fetchThreats(region, 50, "feed"),
+      fetchThreats(region, 40, "ioc"),
+    ]).then(([s, t, ioc]) => {
       if (cancelled) return;
       setStats(s.data);
       setThreats(t.data.items);
-      setIsDemo(s.isDemo || t.isDemo);
+      setIocThreats(ioc.data.items);
+      setIsDemo(s.isDemo || t.isDemo || ioc.isDemo);
       setLoading(false);
     });
     return () => { cancelled = true; };
@@ -196,6 +203,41 @@ export default function DashboardPage() {
             </h2>
             <VendorChart data={stats?.top_vendors ?? []} />
           </div>
+        </section>
+
+        {/* IOC strip */}
+        <section className="animate-fade-in-up mb-6 sm:mb-8" style={{ animationDelay: "350ms" }}>
+          <button
+            onClick={() => setShowIoc(!showIoc)}
+            className="group mb-3 flex items-center gap-2 text-sm font-bold text-text-secondary transition-all hover:text-signal sm:mb-4"
+          >
+            <svg className={`h-5 w-5 transition-transform duration-300 ${showIoc ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+            <span className="inline-flex items-center gap-2">
+              <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-critical/80" />
+              {t.sections.iocThreats}
+            </span>
+            <span className="rounded-full border border-border bg-panel-raised px-2 py-0.5 font-mono text-[10px] font-bold text-text-muted">
+              {iocThreats.length}
+            </span>
+          </button>
+
+          {showIoc && (
+            <div className="animate-fade-in-up">
+              {iocThreats.length === 0 ? (
+                <div className="glass-card rounded-xl border border-border p-8 text-center shadow-sm">
+                  <p className="text-sm text-text-secondary">{t.sections.iocEmpty}</p>
+                </div>
+              ) : (
+                <div className="scrollbar-thin -mx-1 flex gap-3 overflow-x-auto px-1 pb-2">
+                  {iocThreats.map((threat, i) => (
+                    <IocCard key={threat.id} threat={threat} index={i} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </section>
 
         {/* Details */}
@@ -403,5 +445,53 @@ function ClockIcon() {
     <svg className="h-4 w-4 text-info" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
+  );
+}
+
+const IOC_SOURCE_COLOR: Record<string, string> = {
+  "ThreatFox": "text-critical/80 border-critical/30 bg-critical/10",
+  "MalwareBazaar": "text-warning border-warning/30 bg-warning/10",
+  "AlienVault OTX": "text-info border-info/30 bg-info/10",
+};
+
+function IocCard({ threat, index }: { threat: Threat; index: number }) {
+  const iocValue = (threat.summary?.split("\n")[0] || threat.external_id || "").slice(0, 60);
+  const sourceStyle = IOC_SOURCE_COLOR[threat.source] ?? "text-signal border-signal/30 bg-signal/10";
+  const host = (() => {
+    try {
+      return new URL(threat.url ?? "").hostname;
+    } catch {
+      return threat.source;
+    }
+  })();
+  return (
+    <a
+      href={threat.url ?? "#"}
+      target="_blank"
+      rel="noreferrer"
+      className="animate-fade-in flex w-60 flex-shrink-0 flex-col gap-2 rounded-xl border border-border bg-panel p-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-signal/40 hover:shadow-md"
+      style={{ animationDelay: `${index * 40}ms` }}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 font-mono text-[10px] font-bold ${sourceStyle}`}>
+          {threat.source}
+        </span>
+        <span className={`h-2 w-2 flex-shrink-0 rounded-full ${threat.severity === "Critical" ? "bg-critical" : threat.severity === "High" ? "bg-warning" : threat.severity === "Medium" ? "bg-info" : "bg-border-strong"}`} />
+      </div>
+      <span className="line-clamp-2 text-xs font-medium leading-snug text-text-primary">
+        {threat.title}
+      </span>
+      {iocValue && (
+        <span className="block truncate font-mono text-[10px] text-text-muted" title={threat.summary ?? undefined}>
+          {iocValue}
+        </span>
+      )}
+      <span className="mt-auto flex items-center gap-1 text-[10px] text-text-muted">
+        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+        </svg>
+        {host}
+      </span>
+    </a>
   );
 }
