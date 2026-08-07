@@ -159,14 +159,35 @@ function ThreatRow({
             </div>
           </div>
         </td>
-        <td className="hidden whitespace-nowrap px-4 py-3 text-text-secondary lg:table-cell">{threat.vendor ?? "—"}</td>
+        <td className="hidden whitespace-nowrap px-4 py-3 text-text-secondary lg:table-cell">
+          {threat.vendor ?? threat.vendor_local ? (
+            <span title={threat.vendor ? undefined : "Vendor визначено з заголовка"}>
+              {threat.vendor ?? threat.vendor_local}
+              {threat.vendor ? null : <span className="ml-0.5 text-text-muted">*</span>}
+            </span>
+          ) : (
+            "—"
+          )}
+        </td>
         <td className="whitespace-nowrap px-2 py-2.5 sm:px-4 sm:py-3">
           <SeverityBadge severity={threat.severity} />
         </td>
         <td className="whitespace-nowrap px-2 py-2.5 font-mono text-[10px] text-text-secondary sm:px-4 sm:py-3 sm:text-xs">
-          <span className={threat.cvss_score && threat.cvss_score >= 9 ? "font-bold text-critical" : ""}>
-            {threat.cvss_score?.toFixed(1) ?? "—"}
-          </span>
+          {threat.cvss_score != null ? (
+            <span className={threat.cvss_score >= 9 ? "font-bold text-critical" : ""}>
+              {threat.cvss_score.toFixed(1)}
+            </span>
+          ) : threat.local_score != null ? (
+            <span
+              className={`cursor-help ${threat.local_score >= 9 ? "font-bold text-critical" : ""}`}
+              title="Власна оцінка ризику (міжнародний CVSS недоступний)"
+            >
+              {threat.local_score.toFixed(1)}
+              <span className="ml-0.5 text-text-muted">*</span>
+            </span>
+          ) : (
+            "—"
+          )}
         </td>
         <td className="whitespace-nowrap px-2 py-2.5 sm:px-4 sm:py-3">
           <ExploitMaturityBadge maturity={threat.exploit_maturity} />

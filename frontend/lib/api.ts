@@ -31,6 +31,7 @@ const CURATED_THREATS: Threat[] = (curatedRaw as CuratedItem[]).map((item, i) =>
   country: item.country,
   region: item.region,
   vendor: item.vendor ?? null,
+  vendor_local: null,
   products: [],
   published: item.published,
   tags: item.tags,
@@ -38,6 +39,7 @@ const CURATED_THREATS: Threat[] = (curatedRaw as CuratedItem[]).map((item, i) =>
   url: item.url,
   cve_id: null,
   cvss_score: null,
+  local_score: null,
   epss_score: null,
   exploit_maturity: item.exploit_maturity,
 }));

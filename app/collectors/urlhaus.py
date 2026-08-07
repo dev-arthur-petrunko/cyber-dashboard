@@ -42,10 +42,20 @@ class URLhausCollector(BaseCollector):
             return []
 
         # Дамп может прийти как голый список ИЛИ как {"query_status": ..., "urls": [...]}
-        if isinstance(payload, dict):
-            records = payload.get("urls") or payload.get("data") or []
-        elif isinstance(payload, list):
+        if isinstance(payload, list):
             records = payload
+        elif isinstance(payload, dict):
+            # Реальний формат експорту URLhaus — dict з id-ключем і списком
+            # записів: {"3898642": [ {url: ...}, ... ]}. Крім того підтримуємо
+            # {"urls": [...]} / {"data": [...]}.
+            records = payload.get("urls") or payload.get("data") or []
+            if not records:
+                records = [
+                    record
+                    for value in payload.values()
+                    if isinstance(value, list)
+                    for record in value
+                ]
         else:
             logger.error("URLhaus: неочікуваний формат відповіді (%s)", type(payload).__name__)
             return []

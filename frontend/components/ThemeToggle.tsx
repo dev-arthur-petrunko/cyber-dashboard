@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export function ThemeToggle() {
+export function ThemeToggle({ bare = false }: { bare?: boolean }) {
   const [isDark, setIsDark] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -30,7 +30,9 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="group relative flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-panel hover:bg-panel-raised transition-all sm:h-9 sm:w-9"
+      className={`group relative flex h-7 w-7 items-center justify-center transition-all hover:bg-panel-raised sm:h-9 sm:w-9 ${
+        bare ? "rounded-md" : "rounded-lg border border-border bg-panel hover:border-signal/40"
+      }`}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
       {isDark ? (

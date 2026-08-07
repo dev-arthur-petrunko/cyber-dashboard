@@ -25,6 +25,11 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [recentPage, setRecentPage] = useState(0);
+
+  useEffect(() => {
+    setRecentPage(0);
+  }, [threats]);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,7 +57,9 @@ export default function DashboardPage() {
     return acc;
   }, {});
 
-  const recentThreats = threats.slice(0, 5);
+  const RECENT_PAGE_SIZE = 10;
+  const recentPages = Math.max(1, Math.ceil(threats.length / RECENT_PAGE_SIZE));
+  const pageThreats = threats.slice(recentPage * RECENT_PAGE_SIZE, (recentPage + 1) * RECENT_PAGE_SIZE);
 
   return (
     <main className="mesh-gradient-bg min-h-screen bg-bg">
@@ -65,9 +72,9 @@ export default function DashboardPage() {
 
       <PulseStrip hourlyVolume={DEMO_PULSE} />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-3 py-3 sm:px-4 sm:py-4 lg:px-8 lg:py-8">
+      <div className="relative z-10 mx-auto max-w-7xl px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-8">
         {/* Header — mobile: stacked, desktop: row */}
-        <header className="animate-fade-in-up mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <header className="animate-fade-in-up mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="gradient-border flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-ua-blue to-signal shadow-lg sm:h-11 sm:w-11">
               <svg className="h-4 w-4 text-white sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -75,44 +82,63 @@ export default function DashboardPage() {
               </svg>
             </div>
             <div className="min-w-0 flex-1">
-              <h1 className="font-mono text-sm font-black tracking-tight text-text-primary sm:text-lg lg:text-xl">
+              <h1 className="font-mono text-sm font-black tracking-tight text-text-primary sm:text-lg xl:text-xl">
                 UA CYBER THREAT
               </h1>
               <div className="flex items-center gap-2 text-[11px] text-text-secondary sm:text-sm">
-                <span>{stats?.total_threats ?? "—"} {t.header.records}</span>
-                <span className="hidden h-3 w-px bg-border sm:block" />
-                <span className="hidden items-center gap-1.5 sm:inline-flex" title={stats?.last_update ?? undefined}>
+                <span className="hidden sm:inline">{stats?.total_threats ?? "—"} {t.header.records}</span>
+                <span className="hidden h-3 w-px bg-border xl:block" />
+                <span className="hidden items-center gap-1.5 xl:inline-flex" title={stats?.last_update ?? undefined}>
                   <span className={`h-1.5 w-1.5 rounded-full ${isDemo ? "bg-warning" : "bg-signal"}`} />
                   {isDemo ? t.header.demoWarning : lastUpdate}
                 </span>
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-3">
-            <RegionToggle value={region} onChange={setRegion} />
-            <Link
-              href="/sources"
-              className="inline-flex items-center gap-1 rounded-lg border border-border bg-panel px-2 py-1.5 text-[11px] font-medium text-text-secondary shadow-sm transition-all hover:border-signal/40 hover:text-signal sm:px-3 sm:py-2 sm:text-sm"
-            >
-              <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-              <span className="hidden sm:inline">{t.header.sources}</span>
-            </Link>
-            <button
-              type="button"
-              onClick={() => setRefreshKey((value) => value + 1)}
-              className="inline-flex items-center gap-1 rounded-lg border border-border bg-panel px-2 py-1.5 text-[11px] font-medium text-text-secondary shadow-sm transition-[border-color,color,transform] duration-150 active:scale-[0.97] hover:border-signal/40 hover:text-signal sm:px-3 sm:py-2 sm:text-sm"
-              aria-label="Refresh dashboard data"
-              title="Refresh dashboard data"
-            >
-              <svg className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""} sm:h-4 sm:w-4`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              <span className="hidden sm:inline">Refresh</span>
-            </button>
-            <LanguageToggle />
-            <ThemeToggle />
+          <div className="flex min-w-0 flex-nowrap items-center gap-1.5 overflow-x-auto pb-0.5 sm:gap-2">
+            <div className="shrink-0">
+              <RegionToggle value={region} onChange={setRegion} />
+            </div>
+            <div className="inline-flex shrink-0 items-center gap-0.5 rounded-lg border border-border bg-panel p-0.5 shadow-sm">
+              <Link
+                href="/support"
+                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-text-secondary transition-all hover:bg-panel-raised hover:text-signal sm:px-2 sm:py-1.5 sm:text-sm"
+              >
+                <HeartIcon />
+                <span className="hidden sm:inline">Допомога на розвиток проєкту</span>
+              </Link>
+              <Link
+                href="/updates"
+                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-text-secondary transition-all hover:bg-panel-raised hover:text-signal sm:px-2 sm:py-1.5 sm:text-sm"
+              >
+                <SparklesIcon />
+                <span className="hidden sm:inline">Оновлення</span>
+              </Link>
+              <Link
+                href="/sources"
+                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-text-secondary transition-all hover:bg-panel-raised hover:text-signal sm:px-2 sm:py-1.5 sm:text-sm"
+              >
+                <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                <span className="hidden sm:inline">{t.header.sources}</span>
+              </Link>
+            </div>
+            <div className="inline-flex shrink-0 items-center gap-0.5 rounded-lg border border-border bg-panel p-0.5 shadow-sm">
+              <LanguageToggle />
+              <button
+                type="button"
+                onClick={() => setRefreshKey((value) => value + 1)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-text-secondary transition-all active:scale-[0.97] hover:bg-panel-raised hover:text-signal sm:h-9 sm:w-9"
+                aria-label="Refresh dashboard data"
+                title="Refresh dashboard data"
+              >
+                <svg className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""} sm:h-4 sm:w-4`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
+              <ThemeToggle bare />
+            </div>
           </div>
         </header>
 
@@ -232,17 +258,46 @@ export default function DashboardPage() {
 
               <DetailCard title={t.sections.recentThreats} icon={<ClockIcon />}>
                 <div className="space-y-2.5">
-                  {recentThreats.map((threat) => (
-                    <div key={threat.id} className="group flex items-start gap-2">
-                      <span className={`mt-1.5 h-2 w-2 flex-shrink-0 rounded-full ${threat.severity === "Critical" ? "bg-critical" : threat.severity === "High" ? "bg-warning" : "bg-info"}`} />
-                      <div className="min-w-0 flex-1">
-                        <a href={threat.url ?? "#"} target="_blank" rel="noreferrer" className="block truncate text-xs font-medium text-text-primary transition-colors hover:text-signal">
-                          {threat.title}
-                        </a>
-                        <p className="mt-0.5 truncate text-[10px] text-text-muted">{threat.source} · {threat.severity}</p>
+                  <div className="max-h-64 space-y-2.5 overflow-y-auto pr-1 sm:max-h-72">
+                    {pageThreats.map((threat) => (
+                      <div key={threat.id} className="group flex items-start gap-2">
+                        <span className={`mt-1.5 h-2 w-2 flex-shrink-0 rounded-full ${threat.severity === "Critical" ? "bg-critical" : threat.severity === "High" ? "bg-warning" : "bg-info"}`} />
+                        <div className="min-w-0 flex-1">
+                          <a href={threat.url ?? "#"} target="_blank" rel="noreferrer" className="block truncate text-xs font-medium text-text-primary transition-colors hover:text-signal">
+                            {threat.title}
+                          </a>
+                          <p className="mt-0.5 truncate text-[10px] text-text-muted">{threat.source} · {threat.severity}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setRecentPage((p) => Math.max(0, p - 1))}
+                      disabled={recentPage === 0}
+                      className="flex h-6 w-6 items-center justify-center rounded-md border border-border text-text-secondary transition-all hover:border-signal/40 hover:text-signal disabled:cursor-not-allowed disabled:opacity-40"
+                      aria-label="Previous page"
+                    >
+                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <span className="font-mono text-[10px] font-bold text-text-muted">
+                      {recentPage + 1} / {recentPages}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setRecentPage((p) => Math.min(recentPages - 1, p + 1))}
+                      disabled={recentPage >= recentPages - 1}
+                      className="flex h-6 w-6 items-center justify-center rounded-md border border-border text-text-secondary transition-all hover:border-signal/40 hover:text-signal disabled:cursor-not-allowed disabled:opacity-40"
+                      aria-label="Next page"
+                    >
+                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </DetailCard>
             </div>
@@ -284,6 +339,14 @@ function DetailCard({ title, icon, children }: { title: string; icon: React.Reac
       </h3>
       {children}
     </div>
+  );
+}
+
+function HeartIcon() {
+  return (
+    <svg className="h-4 w-4 text-critical/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+    </svg>
   );
 }
 

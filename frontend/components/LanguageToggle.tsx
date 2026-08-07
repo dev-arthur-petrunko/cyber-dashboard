@@ -6,16 +6,16 @@ export function LanguageToggle() {
   const { lang, setLang } = useTranslation();
 
   const languages = [
-    { code: "uk", label: "Українська" },
-    { code: "en", label: "English" },
-    { code: "pl", label: "Polski" },
-    { code: "fr", label: "Français" },
-    { code: "de", label: "Deutsch" },
+    { code: "uk", label: "UA" },
+    { code: "en", label: "EN" },
+    { code: "pl", label: "PL" },
+    { code: "fr", label: "FR" },
+    { code: "de", label: "DE" },
   ] as const;
 
   return (
     <label
-      className="relative flex h-7 items-center rounded-lg border border-border bg-panel px-2 text-text-secondary transition-colors hover:border-signal/40 sm:h-9 sm:px-3"
+      className="relative flex h-7 items-center rounded-md border border-signal/40 bg-signal/5 px-2 text-signal transition-colors hover:border-signal/70 hover:bg-signal/10 sm:h-9 sm:px-3"
       aria-label="Language"
     >
       <span className="sr-only">Language</span>

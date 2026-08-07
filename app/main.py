@@ -14,6 +14,7 @@ from app.db import ThreatORM, get_session, init_db
 from app.timeline import build_timeline
 from app.attack import search_groups
 from app.explanation import generate_explanation
+from app.scoring import compute_local_score, extract_vendor
 from app.models.threat import Threat
 
 app = FastAPI(
@@ -214,7 +215,7 @@ def stats(db: Session = Depends(get_session), region: Optional[str] = None):
 
 
 def _serialize(row: ThreatORM) -> dict:
-    return {
+    data = {
         "id": row.id,
         "external_id": row.external_id,
         "title": row.title,
@@ -234,3 +235,16 @@ def _serialize(row: ThreatORM) -> dict:
         "epss_score": row.epss_score,
         "exploit_maturity": row.exploit_maturity,
     }
+    data["local_score"] = compute_local_score(
+        severity=row.severity,
+        exploit_maturity=row.exploit_maturity,
+        epss_score=row.epss_score,
+        title=row.title,
+        tags=row.tags,
+    )
+    data["vendor_local"] = extract_vendor(
+        title=row.title,
+        summary=row.summary,
+        tags=row.tags,
+    )
+    return data

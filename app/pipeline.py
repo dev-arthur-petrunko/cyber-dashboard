@@ -55,7 +55,9 @@ COLLECTORS = [
     CISAKEVCollector(),
     GitHubPoCCollector(lookback_days=7),
     GitHubAdvisoriesCollector(lookback_days=7),
-    ExploitDBCollector(lookback_days=7),
+    # Дзеркало CSV Exploit-DB на gitlab відстає від live-бази на ~місяць,
+    # тому вікно 60 днів, а не 7 — інакше колектор завжди повертає 0.
+    ExploitDBCollector(lookback_days=60),
     # Мир — новости и IOC
     NewsCollector(),
     NCSCCollector(),

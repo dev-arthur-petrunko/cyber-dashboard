@@ -18,6 +18,7 @@ export interface Threat {
   country: string[];
   region: Region;
   vendor: string | null;
+  vendor_local: string | null;
   products: string[];
   published: string;
   tags: string[];
@@ -25,6 +26,7 @@ export interface Threat {
   url: string | null;
   cve_id: string | null;
   cvss_score: number | null;
+  local_score: number | null;
   epss_score: number | null;
   exploit_maturity: ExploitMaturity;
   explanation?: Explanation;
