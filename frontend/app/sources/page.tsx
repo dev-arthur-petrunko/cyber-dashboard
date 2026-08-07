@@ -57,13 +57,23 @@ export default function SourcesPage() {
           )}
         />
 
+        {/* World sources */}
+        <SourceSection
+          title={t.sources.worldSources}
+          icon="🌍"
+          items={(sources.world_sources as SourceItem[]) || []}
+          render={(s, i) => (
+            <TelemetryCard key={s.name} item={s} delay={i} />
+          )}
+        />
+
         {/* Vendor RSS */}
         <SourceSection
           title={t.sources.vendorRSS}
           icon="📡"
           items={(sources.vendor_rss as SourceItem[]) || []}
           render={(s, i) => (
-            <SourceCard name={s.name} url={s.url} description={s.description || ""} status="active" delay={i} />
+            <SourceCard name={s.name} url={s.url} description={cardText(t, s.name, s.description || "")} status="active" delay={i} />
           )}
         />
 
@@ -73,7 +83,7 @@ export default function SourcesPage() {
           icon="✓"
           items={(sources.integrated_ua as SourceItem[]) || []}
           render={(s, i) => (
-            <SourceCard name={s.name} url={s.url} description={s.description || ""} status="active" delay={i} />
+            <SourceCard name={s.name} url={s.url} description={cardText(t, s.name, s.description || "")} status="active" delay={i} />
           )}
         />
 
@@ -94,7 +104,7 @@ export default function SourcesPage() {
             <h2 className="text-lg font-bold text-text-primary">{t.sources.telegram}</h2>
           </div>
           <div className="rounded-xl border border-info/30 bg-info/5 p-4 text-sm text-info shadow-sm">
-            <p className="mb-3">{sources.note}</p>
+            <p className="mb-3">{telegramNoteText(t, sources.note)}</p>
           </div>
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {sources.telegram_channels.map((ch, i) => (
@@ -108,7 +118,7 @@ export default function SourcesPage() {
               >
                 <div>
                   <p className="font-medium text-text-primary transition-colors group-hover:text-info">{ch.name}</p>
-                  <p className="text-xs text-text-muted">{ch.description}</p>
+                  <p className="text-xs text-text-muted">{channelCardText(t, ch.name, ch.description)}</p>
                 </div>
                 <svg className="h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -203,7 +213,7 @@ function TelemetryCard({ item, delay }: { item: SourceItem; delay: number }) {
           {badgeText}
         </span>
       </div>
-      <p className="text-sm text-text-secondary">{item.description}</p>
+      <p className="text-sm text-text-secondary">{cardText(t, item.name, item.description || "")}</p>
       {item.requires_key && (
         <p className="mt-2 text-xs text-warning">
           {t.sources.keyRequired} <span className="font-mono font-semibold">{item.requires_key}</span>
@@ -241,6 +251,9 @@ function TelemetryCard({ item, delay }: { item: SourceItem; delay: number }) {
 
 function PlannedCard({ item, delay }: { item: SourceItem; delay: number }) {
   const { t } = useTranslation();
+  const translated = sourcePlannedText(t, item.name);
+  const problem = translated?.problem ?? item.problem;
+  const solution = translated?.solution ?? item.possible_solution;
   return (
     <div
       className="animate-slide-in-right glass-card rounded-xl border border-border p-4 shadow-sm sm:p-5"
@@ -262,12 +275,35 @@ function PlannedCard({ item, delay }: { item: SourceItem; delay: number }) {
       </div>
       <div className="space-y-2 text-sm">
         <p className="text-text-secondary">
-          <span className="font-semibold text-warning">{t.sources.problem}</span> {item.problem}
+          <span className="font-semibold text-warning">{t.sources.problem}</span> {problem}
         </p>
         <p className="text-text-muted">
-          <span className="font-semibold text-signal">{t.sources.solution}</span> {item.possible_solution}
+          <span className="font-semibold text-signal">{t.sources.solution}</span> {solution}
         </p>
       </div>
     </div>
   );
+}
+
+function cardText(t: ReturnType<typeof useTranslation>["t"], name: string, fallback: string): string {
+  const cards = (t as unknown as { sourceCards?: Record<string, string> }).sourceCards;
+  return cards?.[name] ?? fallback;
+}
+
+function sourcePlannedText(
+  t: ReturnType<typeof useTranslation>["t"],
+  name: string,
+): { problem?: string; solution?: string } | undefined {
+  const planned = (t as unknown as { sourcePlanned?: Record<string, { problem: string; solution: string }> }).sourcePlanned;
+  return planned?.[name];
+}
+
+function telegramNoteText(t: ReturnType<typeof useTranslation>["t"], fallback: string): string {
+  const note = (t as unknown as { telegramNote?: string }).telegramNote;
+  return note || fallback;
+}
+
+function channelCardText(t: ReturnType<typeof useTranslation>["t"], name: string, fallback: string): string {
+  const channels = (t as unknown as { telegramChannelCards?: Record<string, string> }).telegramChannelCards;
+  return channels?.[name] ?? fallback;
 }

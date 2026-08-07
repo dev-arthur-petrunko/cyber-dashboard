@@ -47,6 +47,12 @@
       "url": "https://blog.talosintelligence.com",
       "status": "active",
       "description": "Технічні звіти партнерів CERT-UA через RSS"
+    },
+    {
+      "name": "Кіберполіція України",
+      "url": "https://cyberpolice.gov.ua/articles/",
+      "status": "active",
+      "description": "Новини та попередження кіберполіції України (HTML-скрапер зі сторінки /articles/)"
     }
   ],
   "telemetry_api": [
@@ -57,6 +63,14 @@
       "description": "JSON API для свіжих IoC та семплів малварі за тегами (Ukraine, UAC-0010, Sandworm). Інтегровано з API-ключем abuse.ch.",
       "requires_key": "ABUSECH_AUTH_KEY",
       "docs": "https://mb-api.abuse.ch/"
+    },
+    {
+      "name": "URLhaus (abuse.ch)",
+      "url": "https://urlhaus.abuse.ch",
+      "status": "active",
+      "description": "Шкідливі URL-адреси (розповсюдження малварі, C2). Адаптовано до нового формату відповіді API abuse.ch.",
+      "requires_key": "ABUSECH_AUTH_KEY",
+      "docs": "https://urlhaus-api.abuse.ch/"
     },
     {
       "name": "AlienVault OTX",
@@ -73,6 +87,52 @@
       "description": "Статистика заражених пристроїв, DDoS та сканувань. Повні дампи вимагають підписки як CERT/AS-власник.",
       "requires_key": null,
       "docs": "https://api.shadowserver.org/"
+    }
+  ],
+  "world_sources": [
+    {
+      "name": "NVD",
+      "url": "https://nvd.nist.gov",
+      "status": "active",
+      "description": "Національна база вразливостей США: CVE, CVSS-бали, CPE. Офіційний API (для частини нових CVE-2026 CVSS може бути відсутній — тоді використовується власна оцінка з позначкою *)",
+      "docs": "https://nvd.nist.gov/developers/vulnerabilities"
+    },
+    {
+      "name": "CISA KEV",
+      "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+      "status": "active",
+      "description": "Каталог вразливостей, які реально експлуатуються у природі (In the wild) — найбільше джерело у базі",
+      "docs": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
+    },
+    {
+      "name": "GitHub (PoC)",
+      "url": "https://github.com",
+      "status": "active",
+      "description": "Публічні PoC-експлойти та GitHub Security Advisories (GitHub API). Для частини CVE є кілька PoC-репозиторіїв"
+    },
+    {
+      "name": "Exploit-DB",
+      "url": "https://www.exploit-db.com",
+      "status": "active",
+      "description": "Готові експлойти (CSV-дзеркало на GitLab). Вікно збору 60 днів, бо дзеркало відстає від live-бази на ~місяць"
+    },
+    {
+      "name": "NCSC UK",
+      "url": "https://www.ncsc.gov.uk",
+      "status": "active",
+      "description": "Офіційні звіти британського національного центру кібербезпеки (RSS)"
+    },
+    {
+      "name": "The Hacker News",
+      "url": "https://thehackernews.com",
+      "status": "active",
+      "description": "Міжнародні новини про APT, атаки та вразливості (RSS)"
+    },
+    {
+      "name": "BleepingComputer",
+      "url": "https://www.bleepingcomputer.com",
+      "status": "active",
+      "description": "Новини кібербезпеки: інциденти, ransomware, патчі (RSS)"
     }
   ],
   "vendor_rss": [
@@ -93,24 +153,28 @@
     {
       "name": "Держспецзв'язку / SSSCIP",
       "url": "https://cip.gov.ua/ua/news",
-      "problem": "Access Denied від Akamai EdgeSuite навіть через Playwright у цій мережі.",
-      "possible_solution": "Потрібен запуск з іншої IP/мережі, резидентний проксі або доступ через офіційний API/канал."
+      "status": "partial",
+      "problem": "Колектор реалізовано (Playwright, app/collectors/ssscip_ua.py), але Akamai EdgeSuite періодично блокує доступ — записів у базі майже немає.",
+      "possible_solution": "Запуск зі стабільної IP, резидентний проксі або офіційний API/канал."
     },
     {
       "name": "НКЦК при РНБО",
       "url": "https://rnbo.gov.ua/ua/Novyny/",
-      "problem": "Реалізовано збір зі сторінки новин, але новини кібертематики зустрічаються рідко.",
+      "status": "partial",
+      "problem": "Колектор реалізовано (app/collectors/rnbo_ua.py), але новини саме кібертематики публікуються рідко — записів у базі немає.",
       "possible_solution": "Моніторити /ua/Novyny/ і фільтрувати за темами: кібер, штучний інтелект, критична інфраструктура."
     },
     {
       "name": "СБУ / Департамент кібербезпеки",
       "url": "https://ssu.gov.ua/novyny",
-      "problem": "Access Denied від Akamai EdgeSuite навіть через Playwright у цій мережі.",
+      "status": "partial",
+      "problem": "Колектор реалізовано (app/collectors/ssu_ua.py), але Access Denied від Akamai EdgeSuite навіть через Playwright у цій мережі.",
       "possible_solution": "Потрібен запуск з іншої IP/мережі або офіційний канал/RSS СБУ."
     },
     {
       "name": "НБУ — CSIRT-BANK",
       "url": "https://bank.gov.ua",
+      "status": "planned",
       "problem": "Є команда кібербезпеки банківського сектора, але публікує нерегулярно та не через відкриту стрічку.",
       "possible_solution": "Моніторити обидва джерела: (1) розділ безпеки/захисту інформації на bank.gov.ua, (2) офіційні повідомлення та прес-релізи НБУ як регулятора банківського сектора."
     }
