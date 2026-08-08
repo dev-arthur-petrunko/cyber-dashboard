@@ -26,7 +26,7 @@ export function RegionToggle({
           <button
             key={opt.label}
             onClick={() => onChange(opt.value)}
-            className={`relative flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-all sm:gap-1.5 sm:rounded-lg sm:px-3 sm:py-2 sm:text-sm ${
+            className={`relative flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all sm:gap-1.5 sm:rounded-lg sm:px-3 sm:py-2 sm:text-sm ${
               active
                 ? "bg-gradient-to-r from-signal/20 to-info/20 text-text-primary shadow-sm"
                 : "text-text-secondary hover:text-text-primary hover:bg-panel-raised"

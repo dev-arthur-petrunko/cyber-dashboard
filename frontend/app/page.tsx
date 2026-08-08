@@ -319,7 +319,7 @@ export default function DashboardPage() {
                       type="button"
                       onClick={() => setRecentPage((p) => Math.max(0, p - 1))}
                       disabled={recentPage === 0}
-                      className="flex h-6 w-6 items-center justify-center rounded-md border border-border text-text-secondary transition-all hover:border-signal/40 hover:text-signal disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex h-9 w-9 items-center justify-center rounded-md border border-border text-text-secondary transition-all hover:border-signal/40 hover:text-signal disabled:cursor-not-allowed disabled:opacity-40 sm:h-8 sm:w-8"
                       aria-label="Previous page"
                     >
                       <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -333,7 +333,7 @@ export default function DashboardPage() {
                       type="button"
                       onClick={() => setRecentPage((p) => Math.min(recentPages - 1, p + 1))}
                       disabled={recentPage >= recentPages - 1}
-                      className="flex h-6 w-6 items-center justify-center rounded-md border border-border text-text-secondary transition-all hover:border-signal/40 hover:text-signal disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex h-9 w-9 items-center justify-center rounded-md border border-border text-text-secondary transition-all hover:border-signal/40 hover:text-signal disabled:cursor-not-allowed disabled:opacity-40 sm:h-8 sm:w-8"
                       aria-label="Next page"
                     >
                       <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

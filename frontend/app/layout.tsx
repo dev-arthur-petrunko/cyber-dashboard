@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { JetBrains_Mono } from "next/font/google";
 import { cookies } from "next/headers";
@@ -32,6 +32,13 @@ export function generateMetadata(): Metadata {
     description: translations[lang].meta.description,
   };
 }
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#0F172A",
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const lang = getLang();

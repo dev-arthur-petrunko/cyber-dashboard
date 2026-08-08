@@ -70,9 +70,27 @@ export function ThreatTable({ threats }: { threats: Threat[] }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border shadow-sm">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[700px] border-collapse text-sm">
+    <>
+      {/* Mobile: stacked threat cards */}
+      <div className="space-y-2 md:hidden">
+        {threats.map((threat, i) => (
+          <MobileThreatCard
+            key={threat.id}
+            threat={threat}
+            index={i}
+            isExpanded={expandedId === threat.id}
+            explanation={explanations[threat.id]}
+            isLoading={loadingId === threat.id}
+            onToggle={() => toggleExpand(threat.id)}
+            t={t}
+          />
+        ))}
+      </div>
+
+      {/* Tablet & desktop: scrollable table */}
+      <div className="hidden overflow-hidden rounded-xl border border-border shadow-sm md:block">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[700px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-border bg-gradient-to-r from-panel-raised via-panel-raised to-panel text-left text-[10px] uppercase tracking-wide text-text-secondary sm:text-xs">
               <th className="w-1" />
@@ -101,7 +119,8 @@ export function ThreatTable({ threats }: { threats: Threat[] }) {
           </tbody>
         </table>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -218,6 +237,90 @@ function ThreatRow({
         </tr>
       )}
     </>
+  );
+}
+
+function MobileThreatCard({
+  threat,
+  index,
+  isExpanded,
+  explanation,
+  isLoading,
+  onToggle,
+  t,
+}: {
+  threat: Threat;
+  index: number;
+  isExpanded: boolean;
+  explanation?: Explanation;
+  isLoading: boolean;
+  onToggle: () => void;
+  t: any;
+}) {
+  return (
+    <div
+      onClick={onToggle}
+      className="animate-slide-in-right cursor-pointer rounded-xl border border-border bg-panel p-3 shadow-sm transition-all duration-300 active:scale-[0.99]"
+      style={{ animationDelay: `${Math.min(index * 40, 800)}ms` }}
+    >
+      <div className={`mb-2.5 h-1 w-8 rounded-full ${SEVERITY_BAR[threat.severity]}`} />
+
+      <div className="flex items-center justify-between gap-2">
+        <span className="truncate font-mono text-[10px] font-medium text-text-secondary">{threat.source}</span>
+        <span className="flex flex-shrink-0 items-center gap-1.5">
+          <SeverityBadge severity={threat.severity} />
+          <span className="font-mono text-xs text-text-secondary">
+            {threat.cvss_score != null ? (
+              <span className={threat.cvss_score >= 9 ? "font-bold text-critical" : ""}>{threat.cvss_score.toFixed(1)}</span>
+            ) : threat.local_score != null ? (
+              <span title={t.table.localScoreTooltip}>
+                {threat.local_score.toFixed(1)}
+                <span className="ml-0.5 text-text-muted">*</span>
+              </span>
+            ) : (
+              "—"
+            )}
+          </span>
+        </span>
+      </div>
+
+      <p className="mt-2 text-sm font-medium leading-snug text-text-primary" title={threat.title}>
+        {threat.title}
+      </p>
+
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        {threat.cve_id && (
+          <Link
+            href={`/timeline/${threat.cve_id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-1 rounded-md bg-signal/10 px-1.5 py-0.5 font-mono text-[10px] text-signal transition-colors hover:bg-signal/20"
+            title={t.table.showTimeline}
+          >
+            {threat.cve_id}
+            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </Link>
+        )}
+        <ExploitMaturityBadge maturity={threat.exploit_maturity} />
+        <span className="ml-auto font-mono text-[10px] text-text-muted">{timeAgo(threat.published, t)}</span>
+      </div>
+
+      {isExpanded && (
+        <div className="mt-3 border-t border-border pt-3">
+          {isLoading ? (
+            <div className="flex items-center gap-3 text-sm text-text-muted">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-signal border-t-transparent" />
+              <span>{t.explain?.loading || "Завантаження..."}</span>
+            </div>
+          ) : explanation ? (
+            <ExplanationContent explanation={explanation} threat={threat} t={t} />
+          ) : (
+            <p className="text-sm text-text-muted">{t.explain?.error || "Не вдалося завантажити пояснення"}</p>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
