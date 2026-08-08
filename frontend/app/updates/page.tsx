@@ -5,10 +5,11 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useTranslation } from "@/components/LanguageContext";
 
-const VERSION = "v1.2.0";
+const VERSION = "v1.2.4";
 
-const VERSION_GROUPS: { key: string; version: string; itemsKey: "v1_2" | "v1_1" | "v1_0" }[] = [
-  { key: "current", version: VERSION, itemsKey: "v1_2" },
+const VERSION_GROUPS: { key: string; version: string; itemsKey: "v1_2_4" | "v1_2" | "v1_1" | "v1_0" }[] = [
+  { key: "current", version: VERSION, itemsKey: "v1_2_4" },
+  { key: "v1.2.0", version: "v1.2.0", itemsKey: "v1_2" },
   { key: "v1.1.0", version: "v1.1.0", itemsKey: "v1_1" },
   { key: "v1.0.0", version: "v1.0.0", itemsKey: "v1_0" },
 ];
@@ -74,7 +75,7 @@ export default function UpdatesPage() {
                 </>
               ) : (
                 <div>
-                  {group.key === "v1.1.0" && (
+                  {group.key === "v1.2.0" && (
                     <div className="mb-4 flex items-center gap-2">
                       <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-info/20 text-xs">🕘</span>
                       <h2 className="text-lg font-bold text-text-primary">{t.updates.historyTitle}</h2>
