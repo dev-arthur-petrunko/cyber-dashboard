@@ -1,5 +1,8 @@
+"use client";
+
 import { Timeline, TimelineEvent } from "@/lib/types";
 import { SeverityBadge } from "./SeverityBadge";
+import { useTranslation } from "./LanguageContext";
 
 const DOT_COLOR: Record<TimelineEvent["type"], string> = {
   published: "bg-info",
@@ -10,19 +13,21 @@ const DOT_COLOR: Record<TimelineEvent["type"], string> = {
   mention: "bg-border-strong",
 };
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("uk-UA", { day: "2-digit", month: "short", year: "numeric" });
-}
-
 export function CyberTimeline({ timeline }: { timeline: Timeline }) {
+  const { t, lang } = useTranslation();
+  const locale = lang === "uk" ? "uk-UA" : lang;
+
+  const formatDate = (iso: string): string =>
+    new Date(iso).toLocaleDateString(locale, { day: "2-digit", month: "short", year: "numeric" });
+
   if (!timeline.found) {
     return (
       <div className="rounded-xl border border-border bg-panel p-8 text-center shadow-sm">
         <p className="text-sm text-text-secondary">
-          По <span className="font-mono font-bold text-text-primary">{timeline.cve_id}</span> поки немає даних у базі.
+          {t.timeline.noDataBefore} <span className="font-mono font-bold text-text-primary">{timeline.cve_id}</span> {t.timeline.noDataAfter}
         </p>
         <p className="mt-1 text-xs text-text-muted">
-          Можливо, колектори ще не збирали цей CVE — запусти <code className="rounded bg-panel-raised px-1.5 py-0.5 font-mono text-xs">python -m app.pipeline</code>.
+          {t.timeline.runPipeline} <code className="rounded bg-panel-raised px-1.5 py-0.5 font-mono text-xs">python -m app.pipeline</code>.
         </p>
       </div>
     );
@@ -33,12 +38,12 @@ export function CyberTimeline({ timeline }: { timeline: Timeline }) {
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Metric label="CVSS" value={timeline.cvss_score?.toFixed(1) ?? "—"} />
         <Metric label="EPSS" value={timeline.epss_score != null ? `${Math.round(timeline.epss_score * 100)}%` : "—"} />
-        <Metric label="До PoC" value={timeline.days_to_poc != null ? `${timeline.days_to_poc} дн.` : "—"} />
-        <Metric label="До KEV" value={timeline.days_to_kev != null ? `${timeline.days_to_kev} дн.` : "—"} accent="critical" />
+        <Metric label={t.timeline.daysToPoc} value={timeline.days_to_poc != null ? `${timeline.days_to_poc} ${t.timeline.days}` : "—"} />
+        <Metric label={t.timeline.daysToKev} value={timeline.days_to_kev != null ? `${timeline.days_to_kev} ${t.timeline.days}` : "—"} accent="critical" />
       </div>
 
       <div className="mb-6 rounded-xl border border-signal/30 bg-gradient-to-r from-signal/5 to-info/5 p-5 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-wide text-signal">Висновок</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-signal">{t.timeline.verdict}</p>
         <p className="mt-2 text-sm font-medium text-text-primary">{timeline.verdict}</p>
       </div>
 

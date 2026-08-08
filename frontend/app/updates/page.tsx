@@ -7,41 +7,10 @@ import { useTranslation } from "@/components/LanguageContext";
 
 const VERSION = "v1.2.0";
 
-const V1_2_ITEMS = [
-  "IOC-індикатори (ThreatFox, MalwareBazaar, AlienVault OTX) прибрані з таблиці «Останні загрози» — там тепер лише новини, CVE та advisory",
-  "IOC винесені в окрему згорнуту стрічку «IOC-стрічка (індикатори)»: горизонтальний скрол карток із значенням індикатора та посиланням на джерело",
-];
-
-const HISTORY = [
-  {
-    version: "v1.1.0",
-    items: [
-      "Виправлено збір даних: URLhaus (новий формат API) та Exploit-DB (date_added + вікно 60 днів)",
-      "Шапка: «Допомога на розвиток проєкту», «Оновлення» та «Джерела» — окремі сторінки в одній панелі",
-      "Нова сторінка «Допомога на розвиток проєкту»",
-      "Сторінка «Оновлення» з історією версій",
-      "Перемикач мови: абревіатури UA / EN / PL / FR / DE + яскравіший акцент",
-      "Мова, Refresh та тема — в одній компактній панелі (іконки)",
-      "Шапка в один рядок — одна смуга без переносів",
-      "«Останні загрози»: пагінація по 10 та скрол списку",
-      "Власна оцінка ризику (0–10) за методологією CVSS там, де міжнародний бал недоступний (у колонці CVSS позначається *)",
-      "Vendor визначається з заголовка новинних записів, якщо джерело його не надало (позначається *)",
-    ],
-  },
-  {
-    version: "v1.0.0",
-    items: [
-      "18 джерел загроз (Україна + Світ)",
-      "Єдина модель Threat з дедуплікацією",
-      "Оцінка ризику: CVSS + EPSS + exploit maturity",
-      "Cyber Timeline: публікація → PoC → KEV",
-      "AI-пояснення та рекомендації для кожної загрози",
-      "Дашборд на Next.js з темами та 5 мовами",
-      "Автозбір даних щогодини (GitHub Actions)",
-      "Telegram-розсилка через n8n + AI-агент",
-      "Деплой: Render · Neon · Vercel",
-    ],
-  },
+const VERSION_GROUPS: { key: string; version: string; itemsKey: "v1_2" | "v1_1" | "v1_0" }[] = [
+  { key: "current", version: VERSION, itemsKey: "v1_2" },
+  { key: "v1.1.0", version: "v1.1.0", itemsKey: "v1_1" },
+  { key: "v1.0.0", version: "v1.0.0", itemsKey: "v1_0" },
 ];
 
 export default function UpdatesPage() {
@@ -69,63 +38,71 @@ export default function UpdatesPage() {
 
         <header className="mb-6 animate-fade-in-up sm:mb-8">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-mono text-xl font-black tracking-tight text-text-primary sm:text-2xl">Оновлення</h1>
+            <h1 className="font-mono text-xl font-black tracking-tight text-text-primary sm:text-2xl">{t.updates.title}</h1>
             <span className="rounded-full bg-signal/10 px-2.5 py-1 font-mono text-xs font-bold text-signal">
               {VERSION}
             </span>
           </div>
-          <p className="mt-2 text-xs text-text-secondary sm:text-sm">Що змінилось у поточній версії</p>
+          <p className="mt-2 text-xs text-text-secondary sm:text-sm">{t.updates.subtitle}</p>
         </header>
 
-        <section className="animate-fade-in-up" style={{ animationDelay: "100ms" }}>
-          <div className="rounded-xl border border-signal/20 bg-panel p-4 shadow-sm sm:p-6">
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              <h2 className="font-mono text-sm font-black tracking-tight text-text-primary sm:text-base">{VERSION}</h2>
-              <span className="rounded-full bg-signal/10 px-2 py-0.5 font-mono text-[10px] font-bold uppercase text-signal">
-                Поточна
-              </span>
-            </div>
-            <ul className="space-y-1">
-              {V1_2_ITEMS.map((item) => (
-                <li key={item} className="flex items-start gap-2.5 py-1 text-sm text-text-secondary">
-                  <svg className="mt-0.5 h-4 w-4 flex-shrink-0 text-signal" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m5 13 4 4L19 7" />
-                  </svg>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        <section className="mt-6 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
-          <div className="mb-4 flex items-center gap-2">
-            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-info/20 text-xs">🕘</span>
-            <h2 className="text-lg font-bold text-text-primary">Історія версій</h2>
-          </div>
-          <div className="space-y-4">
-            {HISTORY.map((entry) => (
-              <div key={entry.version} className="rounded-xl border border-border bg-panel p-4 shadow-sm sm:p-6">
-                <div className="mb-3 flex flex-wrap items-center gap-2">
-                  <h3 className="font-mono text-sm font-black tracking-tight text-text-primary sm:text-base">{entry.version}</h3>
-                  <span className="rounded-full bg-text-muted/10 px-2 py-0.5 font-mono text-[10px] font-bold uppercase text-text-muted">
-                    Попередня
-                  </span>
+        {VERSION_GROUPS.map((group) => (
+          <section
+            key={group.key}
+            className={group.key === "current" ? "animate-fade-in-up" : "mt-6 animate-fade-in-up"}
+            style={{ animationDelay: group.key === "current" ? "100ms" : "200ms" }}
+          >
+            <div className={group.key === "current" ? "rounded-xl border border-signal/20 bg-panel p-4 shadow-sm sm:p-6" : "mb-4"}>
+              {group.key === "current" ? (
+                <>
+                  <div className="mb-3 flex flex-wrap items-center gap-2">
+                    <h2 className="font-mono text-sm font-black tracking-tight text-text-primary sm:text-base">{group.version}</h2>
+                    <span className="rounded-full bg-signal/10 px-2 py-0.5 font-mono text-[10px] font-bold uppercase text-signal">
+                      {t.updates.current}
+                    </span>
+                  </div>
+                  <ul className="space-y-1">
+                    {t.updates[group.itemsKey].map((item) => (
+                      <li key={item} className="flex items-start gap-2.5 py-1 text-sm text-text-secondary">
+                        <svg className="mt-0.5 h-4 w-4 flex-shrink-0 text-signal" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="m5 13 4 4L19 7" />
+                        </svg>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <div>
+                  {group.key === "v1.1.0" && (
+                    <div className="mb-4 flex items-center gap-2">
+                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-info/20 text-xs">🕘</span>
+                      <h2 className="text-lg font-bold text-text-primary">{t.updates.historyTitle}</h2>
+                    </div>
+                  )}
+                  <div className="rounded-xl border border-border bg-panel p-4 shadow-sm sm:p-6">
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                      <h3 className="font-mono text-sm font-black tracking-tight text-text-primary sm:text-base">{group.version}</h3>
+                      <span className="rounded-full bg-text-muted/10 px-2 py-0.5 font-mono text-[10px] font-bold uppercase text-text-muted">
+                        {t.updates.previous}
+                      </span>
+                    </div>
+                    <ul className="space-y-1">
+                      {t.updates[group.itemsKey].map((item) => (
+                        <li key={item} className="flex items-start gap-2.5 py-1 text-sm text-text-secondary">
+                          <svg className="mt-0.5 h-4 w-4 flex-shrink-0 text-info" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m5 13 4 4L19 7" />
+                          </svg>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-                <ul className="space-y-1">
-                  {entry.items.map((item) => (
-                    <li key={item} className="flex items-start gap-2.5 py-1 text-sm text-text-secondary">
-                      <svg className="mt-0.5 h-4 w-4 flex-shrink-0 text-info" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m5 13 4 4L19 7" />
-                      </svg>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </section>
+              )}
+            </div>
+          </section>
+        ))}
 
         <footer className="mt-10 animate-fade-in text-center text-xs text-text-muted" style={{ animationDelay: "300ms" }}>
           {t.sources.footer}

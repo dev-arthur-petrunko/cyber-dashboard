@@ -30,27 +30,18 @@ export default function SupportPage() {
 
         <header className="mb-6 animate-fade-in-up sm:mb-8">
           <h1 className="font-mono text-xl font-black tracking-tight text-text-primary sm:text-2xl">
-            Допомога на розвиток проєкту
+            {t.support.title}
           </h1>
           <p className="mt-2 text-xs text-text-secondary sm:text-sm">
-            Підтримайте незалежний моніторинг кіберзагроз для України
+            {t.support.subtitle}
           </p>
         </header>
 
         <section className="animate-fade-in-up" style={{ animationDelay: "100ms" }}>
           <div className="rounded-xl border border-border bg-panel p-4 shadow-sm sm:p-6">
-            <p className="text-sm leading-relaxed text-text-secondary">
-              Цей дашборд розробляється й підтримується волонтерами. Інтеграція нових джерел,
-              AI-аналіз загроз, підтримка інфраструктури та регулярні оновлення потребують часу
-              та ресурсів.
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-text-secondary">
-              Будь-яка фінансова підтримка допомагає проєкту залишатися безкоштовним, розширювати
-              перелік джерел, покращувати якість даних і зберігати інфраструктуру в робочому стані.
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-text-secondary">
-              Дякуємо за вашу допомогу та підтримку! 🇺🇦
-            </p>
+            <p className="text-sm leading-relaxed text-text-secondary">{t.support.p1}</p>
+            <p className="mt-3 text-sm leading-relaxed text-text-secondary">{t.support.p2}</p>
+            <p className="mt-3 text-sm leading-relaxed text-text-secondary">{t.support.thanks}</p>
           </div>
         </section>
 
@@ -58,12 +49,9 @@ export default function SupportPage() {
           <div className="rounded-xl border border-signal/20 bg-signal/5 p-4 shadow-sm sm:p-6">
             <div className="mb-3 flex items-center gap-2">
               <span className="text-lg">💙</span>
-              <h2 className="text-lg font-bold text-text-primary">Підтримати донатом</h2>
+              <h2 className="text-lg font-bold text-text-primary">{t.support.donateTitle}</h2>
             </div>
-            <p className="text-sm text-text-secondary">
-              За донат ви можете підтримати розвиток проєкту. Деталі та реквізити з&apos;являться тут
-              найближчим часом.
-            </p>
+            <p className="text-sm text-text-secondary">{t.support.donateText}</p>
           </div>
         </section>
 
