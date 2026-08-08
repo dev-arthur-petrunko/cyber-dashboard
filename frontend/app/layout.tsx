@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { JetBrains_Mono } from "next/font/google";
+import { cookies } from "next/headers";
 import "./globals.css";
 import { LanguageProvider } from "@/components/LanguageContext";
+import { Language, translations } from "@/lib/i18n";
 
 const inter = Inter({
   subsets: ["latin", "cyrillic"],
@@ -16,14 +18,25 @@ const jetbrains = JetBrains_Mono({
   variable: "--font-mono",
 });
 
-export const metadata: Metadata = {
-  title: "UA Cyber Threat Dashboard",
-  description: "Моніторинг загроз кібербезпеки для України та світу в реальному часі",
-};
+const LANGS: Language[] = ["uk", "en", "pl", "fr", "de"];
+
+function getLang(): Language {
+  const value = cookies().get("lang")?.value;
+  return (LANGS as string[]).includes(value ?? "") ? (value as Language) : "uk";
+}
+
+export function generateMetadata(): Metadata {
+  const lang = getLang();
+  return {
+    title: "UA Cyber Threat Dashboard",
+    description: translations[lang].meta.description,
+  };
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const lang = getLang();
   return (
-    <html lang="uk" suppressHydrationWarning className={`${inter.variable} ${jetbrains.variable}`}>
+    <html lang={lang} suppressHydrationWarning className={`${inter.variable} ${jetbrains.variable}`}>
       <head>
         <script
           dangerouslySetInnerHTML={{

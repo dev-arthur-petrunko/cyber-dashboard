@@ -13,11 +13,12 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { UaFlag } from "@/components/UaFlag";
 import { useTranslation } from "@/components/LanguageContext";
+import { Translations, Language } from "@/lib/i18n";
 
 const DEMO_PULSE = [2, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 9, 7, 8, 10, 9, 11, 8, 7, 9, 10, 8, 6];
 
 export default function DashboardPage() {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const [region, setRegion] = useState<Region | undefined>(undefined);
   const [stats, setStats] = useState<Stats | null>(null);
   const [threats, setThreats] = useState<Threat[]>([]);
@@ -51,7 +52,7 @@ export default function DashboardPage() {
     return () => { cancelled = true; };
   }, [region, refreshKey]);
 
-  const lastUpdate = stats?.last_update ? formatLastUpdate(stats.last_update) : t.sections.loading;
+  const lastUpdate = stats?.last_update ? formatLastUpdate(stats.last_update, lang, t) : t.sections.loading;
 
   const severityBreakdown = threats.reduce<Record<string, number>>((acc, t) => {
     acc[t.severity] = (acc[t.severity] ?? 0) + 1;
@@ -112,14 +113,14 @@ export default function DashboardPage() {
                 className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-text-secondary transition-all hover:bg-panel-raised hover:text-signal sm:px-2 sm:py-1.5 sm:text-sm"
               >
                 <HeartIcon />
-                <span className="hidden sm:inline">Допомога на розвиток проєкту</span>
+                <span className="hidden sm:inline">{t.header.supportLink}</span>
               </Link>
               <Link
                 href="/updates"
                 className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-text-secondary transition-all hover:bg-panel-raised hover:text-signal sm:px-2 sm:py-1.5 sm:text-sm"
               >
                 <SparklesIcon />
-                <span className="hidden sm:inline">Оновлення</span>
+                <span className="hidden sm:inline">{t.header.updatesLink}</span>
               </Link>
               <Link
                 href="/sources"
@@ -366,10 +367,11 @@ export default function DashboardPage() {
   );
 }
 
-function formatLastUpdate(value: string) {
+function formatLastUpdate(value: string, lang: string, t: Translations[Language]) {
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Sync status unavailable";
-  return `Synced ${new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit" }).format(date)}`;
+  const locale = lang === "uk" ? "uk-UA" : lang;
+  if (Number.isNaN(date.getTime())) return t.header.syncUnavailable;
+  return `${t.header.synced} ${new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit" }).format(date)}`;
 }
 
 function DetailCard({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {

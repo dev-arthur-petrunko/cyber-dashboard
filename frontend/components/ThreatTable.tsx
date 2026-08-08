@@ -5,6 +5,9 @@ import Link from "next/link";
 import { Threat, Explanation } from "@/lib/types";
 import { SeverityBadge, ExploitMaturityBadge } from "./SeverityBadge";
 import { useTranslation } from "./LanguageContext";
+import { Translations, Language } from "@/lib/i18n";
+
+type TranslationDict = Translations[Language];
 
 const SEVERITY_BAR: Record<string, string> = {
   Critical: "bg-critical",
@@ -14,12 +17,12 @@ const SEVERITY_BAR: Record<string, string> = {
   Unknown: "bg-border",
 };
 
-function timeAgo(iso: string): string {
+function timeAgo(iso: string, t: TranslationDict): string {
   const diffMs = Date.now() - new Date(iso).getTime();
   const h = Math.floor(diffMs / 3600000);
-  if (h < 1) return "<1г";
-  if (h < 24) return `${h}г`;
-  return `${Math.floor(h / 24)}д`;
+  if (h < 1) return `${t.time.lessThanHour}${t.time.hour}`;
+  if (h < 24) return `${h}${t.time.hour}`;
+  return `${Math.floor(h / 24)}${t.time.day}`;
 }
 
 async function fetchExplanation(threatId: number): Promise<Explanation | null> {
@@ -161,7 +164,7 @@ function ThreatRow({
         </td>
         <td className="hidden whitespace-nowrap px-4 py-3 text-text-secondary lg:table-cell">
           {threat.vendor ?? threat.vendor_local ? (
-            <span title={threat.vendor ? undefined : "Vendor визначено з заголовка"}>
+            <span title={threat.vendor ? undefined : t.table.vendorFromTitle}>
               {threat.vendor ?? threat.vendor_local}
               {threat.vendor ? null : <span className="ml-0.5 text-text-muted">*</span>}
             </span>
@@ -180,7 +183,7 @@ function ThreatRow({
           ) : threat.local_score != null ? (
             <span
               className={`cursor-help ${threat.local_score >= 9 ? "font-bold text-critical" : ""}`}
-              title="Власна оцінка ризику (міжнародний CVSS недоступний)"
+              title={t.table.localScoreTooltip}
             >
               {threat.local_score.toFixed(1)}
               <span className="ml-0.5 text-text-muted">*</span>
@@ -193,7 +196,7 @@ function ThreatRow({
           <ExploitMaturityBadge maturity={threat.exploit_maturity} />
         </td>
         <td className="whitespace-nowrap px-2 py-2.5 text-right text-[10px] text-text-muted sm:px-4 sm:py-3 sm:text-xs">
-          {timeAgo(threat.published)}
+          {timeAgo(threat.published, t)}
         </td>
       </tr>
       
