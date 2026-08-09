@@ -1,5 +1,15 @@
 # UA Cyber Threat Dashboard
 
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-336791?style=for-the-badge&logo=postgresql&logoColor=white)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)
+![n8n](https://img.shields.io/badge/n8n-EA4B71?style=for-the-badge&logo=n8n&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
+![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+
 Агрегатор загроз кібербезпеки для України: збирає дані з 10 джерел
 (NVD, CISA KEV, CERT-UA, ThreatFox та інші), приводить до єдиної моделі
 та віддає через REST API. Має власний дашборд на Next.js та автоматичну
@@ -7,6 +17,25 @@
 
 🔗 **Демо:** [cyber-dashboard-gamma.vercel.app](https://cyber-dashboard-gamma.vercel.app)
 🔗 **Репозиторій:** [github.com/dev-arthur-petrunko/cyber-dashboard](https://github.com/dev-arthur-petrunko/cyber-dashboard)
+
+<h3 align="center">
+Ось яким стане цей проєкт — він крок за кроком наближається до цього вигляду,<br>
+і рухається вперед лише завдяки вашій підтримці 🚀
+</h3>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/dev-arthur-petrunko/cyber-dashboard/main/images/Main.png" alt="Main" width="100%">
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/dev-arthur-petrunko/cyber-dashboard/main/images/Main_below.png" alt="Main below" width="100%">
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/dev-arthur-petrunko/cyber-dashboard/main/images/Base.png" alt="Base" width="100%">
+</p>
+
+---
 
 ## Архітектура
 
@@ -188,4 +217,3 @@ N8N_WEBHOOK_URL= # webhook n8n для автопублікації в Telegram
 
 Python 3.12 · FastAPI · SQLAlchemy · PostgreSQL (Neon) · GitHub Actions (cron) ·
 Next.js · Recharts · n8n · Groq / SerpAPI
-
