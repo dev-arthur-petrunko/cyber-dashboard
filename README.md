@@ -10,17 +10,17 @@
 ![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
-Агрегатор загроз кібербезпеки для України: збирає дані з 10 джерел
-(NVD, CISA KEV, CERT-UA, ThreatFox та інші), приводить до єдиної моделі
-та віддає через REST API. Має власний дашборд на Next.js та автоматичну
-розсилку зведень у Telegram через n8n.
+A cybersecurity threat aggregator for Ukraine: it collects data from 10 sources
+(NVD, CISA KEV, CERT-UA, ThreatFox, and others), normalizes them into a single
+data model, and exposes it through a REST API. It ships with its own Next.js
+dashboard and automatically publishes summaries to Telegram via n8n.
 
-🔗 **Демо:** [cyber-dashboard-gamma.vercel.app](https://cyber-dashboard-gamma.vercel.app)
-🔗 **Репозиторій:** [github.com/dev-arthur-petrunko/cyber-dashboard](https://github.com/dev-arthur-petrunko/cyber-dashboard)
+🔗 **Demo:** [cyber-dashboard-gamma.vercel.app](https://cyber-dashboard-gamma.vercel.app)
+🔗 **Repository:** [github.com/dev-arthur-petrunko/cyber-dashboard](https://github.com/dev-arthur-petrunko/cyber-dashboard)
 
 <h3 align="center">
-Ось яким стане цей проєкт — він крок за кроком наближається до цього вигляду,<br>
-і рухається вперед лише завдяки вашій підтримці 🚀
+This is what the project is becoming — it's getting closer to this vision step by step,<br>
+and it moves forward only with your support 🚀 Soon I will post a link to the site here and you can use it and help with the development of this project.
 </h3>
 
 <p align="center">
@@ -37,14 +37,14 @@
 
 ---
 
-## Архітектура
+## Architecture
 
 ```
-Collectors (10 джерел, див. таблицю нижче)
+Collectors (10 sources, see table below)
 ↓
-Normalizer (всередині кожного колектора → Threat)
+Normalizer (inside each collector → Threat)
 ↓
-Storage (upsert з дедуплікацією) → EPSS enrichment
+Storage (upsert with deduplication) → EPSS enrichment
 ↓
 PostgreSQL (Neon)
 ↓
@@ -55,132 +55,133 @@ FastAPI (Render) → /threats?region=UA|World /stats /health
 Dashboard (Next.js, Vercel) n8n Webhook → AI Agent → Telegram
 ```
 
-## Джерела даних
+## Data Sources
 
-| Джерело | Регіон | Тип | Статус |
+| Source | Region | Type | Status |
 |---|---|---|---|
-| NVD | Світ | CVE + CVSS score | ✅ реальний API |
-| CISA KEV | Світ | активно експлуатовані CVE | ✅ реальний API |
-| GitHub | Світ | PoC-експлойти | ✅ |
-| Exploit-DB | Світ | готові експлойти | ✅ |
-| The Hacker News / BleepingComputer | Світ | новини | ✅ RSS |
-| NCSC UK | Світ | офіційні threat reports | ✅ RSS |
-| ThreatFox (abuse.ch) | Світ | IOC (шкідливі IP/домени/хеші) | ✅ реальний API |
-| MalwareBazaar | Світ | зразки шкідливого ПЗ | ✅ реальний API |
-| AlienVault OTX | Світ | pulse-звіти | ✅ |
-| CERT-UA | UA | попередження | ✅ RSS |
-| Кіберполіція України | UA | новини | ✅ |
-| Держспецзв'язку (SSSCIP) | UA | новини | ✅ |
-| НКЦК при РНБО | UA | новини | ✅ |
-| СБУ / Департамент кібербезпеки | UA | новини | ⚠️ скрапер, залежить від верстки сайту |
-| Vendor RSS | UA | публікації вендорів про Україну | ✅ |
+| NVD | World | CVE + CVSS score | ✅ real API |
+| CISA KEV | World | actively exploited CVEs | ✅ real API |
+| GitHub | World | PoC exploits | ✅ |
+| Exploit-DB | World | ready-made exploits | ✅ |
+| The Hacker News / BleepingComputer | World | news | ✅ RSS |
+| NCSC UK | World | official threat reports | ✅ RSS |
+| ThreatFox (abuse.ch) | World | IOCs (malicious IPs/domains/hashes) | ✅ real API |
+| MalwareBazaar | World | malware samples | ✅ real API |
+| AlienVault OTX | World | pulse reports | ✅ |
+| CERT-UA | UA | advisories | ✅ RSS |
+| Cyber Police of Ukraine | UA | news | ✅ |
+| SSSCIP (State Service of Special Communication) | UA | news | ✅ |
+| NCCC under the NSDC | UA | news | ✅ |
+| SSU / Cybersecurity Department | UA | news | ⚠️ scraper, depends on site layout |
+| Vendor RSS | UA | vendor publications about Ukraine | ✅ |
 
-## Метрики ризику (не лише Severity-ярлик)
+## Risk Metrics (not just a Severity label)
 
-- **CVSS score** — наскільки вразливість технічно небезпечна (0–10)
-- **EPSS score** — ймовірність реальної експлуатації в найближчі 30 днів (0–1), оновлюється окремим кроком у кінці pipeline
-- **Exploit maturity** — `PoC` (є код на GitHub) → `Weaponized` (готовий експлойт на Exploit-DB) → `In the wild` (у CISA KEV, тобто вже реально атакують)
+- **CVSS score** — how technically dangerous the vulnerability is (0–10)
+- **EPSS score** — probability of real-world exploitation within the next 30 days (0–1), updated in a separate step at the end of the pipeline
+- **Exploit maturity** — `PoC` (code available on GitHub) → `Weaponized` (ready-made exploit on Exploit-DB) → `In the wild` (in CISA KEV, meaning it's actively being exploited)
 
-## Значення з позначкою `*` — власна оцінка (немає офіційних даних)
+## Values marked with `*` — internal estimate (no official data)
 
-Якщо в таблиці значення має зірочку `*` (наприклад `7.3*` або `Microsoft*`) —
-це означає, що джерело **не надало офіційних даних**, і значення розраховане
-нами за тими ж принципами (`app/scoring.py`):
+If a value in the table has an asterisk `*` (e.g. `7.3*` or `Microsoft*`), it
+means the source **did not provide official data**, and the value was
+calculated by us using the same principles (`app/scoring.py`):
 
-- **CVSS `*`** (`compute_local_score`) — власна оцінка ризику **0–10** за
-  методологією, наближеною до міжнародного CVSS, коли офіційний бал відсутній
-  (наприклад, NVD для частини нових CVE-2026 більше не повертає CVSS/CPE).
-  Формула:
-  - база за `severity`: Critical = 9.0, High = 7.5, Medium = 5.0, Low = 2.0, Unknown = 4.0
+- **CVSS `*`** (`compute_local_score`) — our own **0–10** risk estimate using
+  a methodology close to the international CVSS standard, used when an
+  official score is unavailable (for example, NVD no longer returns
+  CVSS/CPE data for some new 2026 CVEs).
+  Formula:
+  - base by `severity`: Critical = 9.0, High = 7.5, Medium = 5.0, Low = 2.0, Unknown = 4.0
   - `+` exploit maturity: In the wild = 1.2, Weaponized = 0.8, PoC = 0.5
-  - `+` EPSS (ймовірність експлуатації протягом 30 днів, 0–1): до +2.0
-  - `+` критичні ключові слова в заголовку/тегах (ransomware, zero-day, APT...): +0.6
-  - результат обмежується діапазоном **0–10**
-- **Vendor `*`** (`extract_vendor`) — виробник визначається з тексту заголовка
-  новинного запису (наприклад «Critical SharePoint RCE…» → `Microsoft*`), коли
-  джерело не вказало вендора. Використовується словник відомих вендорів
+  - `+` EPSS (probability of exploitation within 30 days, 0–1): up to +2.0
+  - `+` critical keywords in the title/tags (ransomware, zero-day, APT...): +0.6
+  - result is capped to the **0–10** range
+- **Vendor `*`** (`extract_vendor`) — the vendor is inferred from the news
+  item's title (e.g. "Critical SharePoint RCE…" → `Microsoft*`) when the
+  source didn't specify one. A dictionary of known vendors is used
   (Microsoft, Cisco, Fortinet, Palo Alto Networks, Adobe, …).
 
-Зірочки **немає**, якщо значення офіційне і надійшло від джерела.
+There is **no asterisk** if the value is official and came directly from the source.
 
-## IOC-стрічка
+## IOC Feed
 
-Таблиця «Останні загрози» показує лише новини, CVE та advisory.
-IOC-індикатори (шкідливі IP/домени/хеші) з ThreatFox, MalwareBazaar та
-AlienVault OTX винесені в окрему згорнуту секцію **«IOC-стрічка
-(індикатори)»** — горизонтальна стрічка карток зі значенням індикатора,
-джерелом і посиланням на оригінал. API-фільтр: `GET /threats?category=feed`
-(без IOC) або `?category=ioc` (тільки індикатори).
+The "Latest Threats" table shows only news, CVEs, and advisories.
+IOC indicators (malicious IPs/domains/hashes) from ThreatFox, MalwareBazaar,
+and AlienVault OTX are moved into a separate, collapsible **"IOC Feed
+(Indicators)"** section — a horizontal strip of cards showing the indicator
+value, source, and a link to the original. API filter: `GET /threats?category=feed`
+(excludes IOCs) or `?category=ioc` (IOCs only).
 
-## Що зроблено
+## What's Done
 
-- [x] 10 колекторів (UA + Світ), єдина модель `Threat`, дедуплікація, EPSS enrichment
-- [x] REST API на FastAPI: `/threats`, `/stats`, `/timeline/{cve}`, `/health`
-- [x] Дашборд на Next.js: KPI-плашки, топ вендорів, таблиця загроз, перемикач Україна/Світ
-- [x] Cyber Timeline — хронологія CVE (публікація → PoC → CISA KEV) з вердиктом про швидкість експлуатації
-- [x] Автозбір через GitHub Actions cron — без власного сервера під pipeline
-- [x] Бекенд задеплоєний на **Render** (Python/FastAPI, free tier)
-- [x] База даних — **PostgreSQL на Neon** (free tier)
-- [x] Фронтенд задеплоєний на **Vercel**
-- [x] **AI Automation через n8n**: після кожного запуску pipeline дані летять на n8n-webhook → AI Agent (Groq + SerpAPI для пошуку контексту по незрозумілих загрозах) аналізує зведення → форматований пост автоматично публікується в Telegram-канал
+- [x] 10 collectors (UA + World), a unified `Threat` model, deduplication, EPSS enrichment
+- [x] REST API on FastAPI: `/threats`, `/stats`, `/timeline/{cve}`, `/health`
+- [x] Next.js dashboard: KPI tiles, top vendors, threats table, Ukraine/World toggle
+- [x] Cyber Timeline — CVE history (publication → PoC → CISA KEV) with an exploitation-speed verdict
+- [x] Automated collection via GitHub Actions cron — no dedicated server needed for the pipeline
+- [x] Backend deployed on **Render** (Python/FastAPI, free tier)
+- [x] Database — **PostgreSQL on Neon** (free tier)
+- [x] Frontend deployed on **Vercel**
+- [x] **AI Automation via n8n**: after every pipeline run, data is sent to an n8n webhook → AI Agent (Groq + SerpAPI to look up context for unfamiliar threats) analyzes the summary → a formatted post is automatically published to a Telegram channel
 
-## Автоматизація: pipeline → n8n → Telegram
+## Automation: pipeline → n8n → Telegram
 
-Після завершення кожного запуску `app/pipeline.py` (включно зі збором з усіх
-джерел та EPSS enrichment) дані **автоматично надсилаються POST-запитом**
-на webhook у n8n:
+After each run of `app/pipeline.py` completes (including collection from all
+sources and EPSS enrichment), the data is **automatically sent via a POST
+request** to an n8n webhook:
 
-Що відбувається на боці n8n:
-1. **Webhook** приймає JSON зі статистикою (`stats`) та списком нових загроз (`new_threats`)
-2. **AI Agent** аналізує дані, обирає 3–5 найважливіших загроз (пріоритет — Critical + активна експлуатація, потім UA-регіон), для незрозумілих кампаній/малварі робить **один** пошуковий запит через SerpAPI, щоб пояснити суть і дати практичну рекомендацію
-3. **Code node** форматує відповідь під Telegram: емодзі, структура, ліміт у 900 символів
-4. **Telegram node** публікує готовий пост у канал
+What happens on the n8n side:
+1. **Webhook** receives a JSON payload with statistics (`stats`) and the list of new threats (`new_threats`)
+2. **AI Agent** analyzes the data, picks the 3–5 most important threats (priority: Critical + active exploitation, then UA region), and for unclear campaigns/malware performs **one** search query via SerpAPI to explain what it is and provide a practical recommendation
+3. **Code node** formats the response for Telegram: emoji, structure, 900-character limit
+4. **Telegram node** publishes the final post to the channel
 
-Налаштовується через `N8N_WEBHOOK_URL` (див. нижче).
+Configured via `N8N_WEBHOOK_URL` (see below).
 
-## Швидкий старт (бекенд)
+## Quick Start (Backend)
 
 ```bash
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
 
-# Зібрати дані
+# Collect data
 python -m app.pipeline
 
-# Підняти API
+# Start the API
 uvicorn app.main:app --reload
-# → http://localhost:8000/docs — Swagger UI з усіма ендпоінтами
+# → http://localhost:8000/docs — Swagger UI with all endpoints
 ```
 
-## Швидкий старт (фронтенд)
+## Quick Start (Frontend)
 
 ```bash
 cd frontend
 npm install
-cp .env.local.example .env.local   # NEXT_PUBLIC_API_URL=<адреса бекенда>
+cp .env.local.example .env.local   # NEXT_PUBLIC_API_URL=<backend address>
 npm run dev
 # → http://localhost:3000
 ```
 
-Якщо бекенд недоступний, фронтенд чесно покаже банер і демо-дані —
-не впаде з порожнім екраном.
+If the backend is unavailable, the frontend honestly shows a banner and
+demo data instead of failing with a blank screen.
 
-⚠️ **Про cold start:** бекенд на Render (free tier) засинає після ~15 хв
-без запитів, перший запит після сну може займати до 50 секунд — саме
-тому іноді на дашборді можна побачити "Бекенд недоступний — показано
-демо-дані" при першому заході.
+⚠️ **About cold starts:** the backend on Render (free tier) goes to sleep
+after ~15 minutes of inactivity, and the first request after that can take
+up to 50 seconds — that's why you might occasionally see "Backend
+unavailable — showing demo data" on first load.
 
-## Ендпоінти
+## Endpoints
 
-- `GET /stats?region=UA|World` — зведення для плашок: Critical, Active Exploits, New CVE 24h, UA Alerts, High EPSS Risk, Top Vendors, By Source
-- `GET /threats?source=&severity=&region=&type=&days=&limit=` — список загроз з фільтрами
-- `GET /timeline/{cve_id}` — Cyber Timeline: хронологія життя загрози + вердикт про швидкість експлуатації
-- `GET /threats/{id}` — деталі однієї загрози
-- `GET /threats/{id}/explain` — AI-пояснення загрози та рекомендації
-- `GET /health` — перевірка живості
+- `GET /stats?region=UA|World` — summary for the KPI tiles: Critical, Active Exploits, New CVE 24h, UA Alerts, High EPSS Risk, Top Vendors, By Source
+- `GET /threats?source=&severity=&region=&type=&days=&limit=` — filtered list of threats
+- `GET /timeline/{cve_id}` — Cyber Timeline: the full lifecycle of a threat plus an exploitation-speed verdict
+- `GET /threats/{id}` — details of a single threat
+- `GET /threats/{id}/explain` — AI explanation of the threat and recommendations
+- `GET /health` — liveness check
 
-## Змінні середовища
+## Environment Variables
 
 ```bash
 DATABASE_URL= # PostgreSQL connection string (Neon)
@@ -188,32 +189,33 @@ NVD_API_KEY=
 GITHUB_TOKEN=
 ABUSECH_AUTH_KEY=
 OTX_API_KEY=
-N8N_WEBHOOK_URL= # webhook n8n для автопублікації в Telegram
+N8N_WEBHOOK_URL= # n8n webhook for auto-publishing to Telegram
 ```
-## Розгортання (як задеплоєно зараз)
 
-| Компонент | Платформа | Тариф |
+## Deployment (current setup)
+
+| Component | Platform | Tier |
 |---|---|---|
 | Backend (FastAPI) | Render | Free |
 | Database (PostgreSQL) | Neon | Free |
 | Frontend (Next.js) | Vercel | Free (Hobby) |
-| Автозбір даних (cron) | GitHub Actions | Free |
+| Data collection (cron) | GitHub Actions | Free |
 | AI Automation → Telegram | n8n (self-hosted) | Free |
 
-## Дорожня карта
+## Roadmap
 
-- [x] Колектори, єдина модель, БД, API
-- [x] 10 джерел (UA + Світ), CVSS/EPSS/exploit maturity, перемикач region
-- [x] Дашборд на Next.js
+- [x] Collectors, unified model, database, API
+- [x] 10 sources (UA + World), CVSS/EPSS/exploit maturity, region toggle
+- [x] Next.js dashboard
 - [x] Cyber Timeline
-- [x] Деплой бекенда на Render + Neon, фронтенда на Vercel
-- [x] AI Automation через n8n: автоматичні зведення в Telegram
-- [ ] Перевірити стабільність скраперів для СБУ (залежить від верстки сайту)
-- [ ] Розширити AI-сумаризацію (`/threats/{id}/explain`)
-- [ ] Погодинна статистика в `/stats` для реальної пульс-лінії (зараз демо-хвиля)
-- [ ] Upgrade на платний тариф Render для усунення cold start
+- [x] Backend deployed on Render + Neon, frontend on Vercel
+- [x] AI Automation via n8n: automatic Telegram summaries
+- [ ] Verify scraper stability for SSU (depends on site layout)
+- [ ] Expand AI summarization (`/threats/{id}/explain`)
+- [ ] Hourly statistics in `/stats` for a real pulse line (currently a demo wave)
+- [ ] Upgrade to a paid Render tier to eliminate cold starts
 
-## Стек
+## Stack
 
 Python 3.12 · FastAPI · SQLAlchemy · PostgreSQL (Neon) · GitHub Actions (cron) ·
 Next.js · Recharts · n8n · Groq / SerpAPI
