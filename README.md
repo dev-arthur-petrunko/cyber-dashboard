@@ -38,7 +38,8 @@ The link will be here ---> (Not yet)
 <p align="center">
   <img src="https://raw.githubusercontent.com/dev-arthur-petrunko/cyber-dashboard/main/images/Base.png" alt="Base" width="100%">
 </p>
-
+---
+# This is what I started this project with, read on!
 ---
 
 ## Architecture
