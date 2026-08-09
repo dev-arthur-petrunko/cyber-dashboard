@@ -1,5 +1,5 @@
 # UA Cyber Threat Dashboard
-
+images/Main.png
 Агрегатор загроз кібербезпеки для України: збирає дані з 10 джерел
 (NVD, CISA KEV, CERT-UA, ThreatFox та інші), приводить до єдиної моделі
 та віддає через REST API. Має власний дашборд на Next.js та автоматичну
