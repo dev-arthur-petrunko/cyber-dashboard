@@ -21,10 +21,11 @@ dashboard and automatically publishes summaries to Telegram via n8n.
 <h3 align="center">
 This is what the project is becoming — it's getting closer to this vision step by step,<br>
 and it moves forward only with your support 🚀 Soon I will post a link to the site here and you can use it and help with the development of this project.
+</h3>
+
 ```bash
 The link will be here ---> (Not yet)
 ```
-</h3>
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/dev-arthur-petrunko/cyber-dashboard/main/images/Main.png" alt="Main" width="100%">
