@@ -10,20 +10,27 @@
 ![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
-A cybersecurity threat aggregator for Ukraine: it collects data from 10 sources
-(NVD, CISA KEV, CERT-UA, ThreatFox, and others), normalizes them into a single
-data model, and exposes it through a REST API. It ships with its own Next.js
-dashboard and automatically publishes summaries to Telegram via n8n.
+A **global cybersecurity threat aggregator** — born in Ukraine, growing for the
+whole world. The project collects data from **18 sources** (NVD, CISA KEV,
+CERT-UA, ThreatFox, Exploit-DB, NCSC UK, and others), normalizes them into a
+single data model, and exposes it through a REST API. It ships with its own
+Next.js dashboard and automatically publishes summaries to Telegram via n8n.
+
+> 🗺️ **The new direction:** the new version is moving beyond Ukraine — the
+> dashboard is now built for **worldwide threat monitoring**. Every new source,
+> every update widens the global picture: CVEs and actively exploited
+> vulnerabilities, exploits, IOCs, and news from around the planet, with the
+> Ukrainian context as one of the strongest regional feeds.
 
 🔗 **Demo:** [cyber-dashboard-gamma.vercel.app](https://cyber-dashboard-gamma.vercel.app)
 🔗 **Repository:** [github.com/dev-arthur-petrunko/cyber-dashboard](https://github.com/dev-arthur-petrunko/cyber-dashboard)
 
 ## Support the project 💙
 
-This project monitors cyber threats not only for **Ukraine**, but for the **whole
-world** — and it stays free thanks to people like you. The development of new
-sources, AI threat analysis, infrastructure, and regular updates take time and
-resources.
+This project monitors cyber threats not only for **Ukraine**, but for the
+**whole world** — and it stays free thanks to people like you. The development
+of new sources, AI threat analysis, infrastructure, and regular updates take
+time and resources.
 
 - 🔗 **Updated project & latest version** — everything you need to know, the
   current links, and the newest build are always here in this README.
@@ -31,8 +38,8 @@ resources.
   source list, and improve data quality. Details on how to support the project
   will be listed here — stay tuned.
 
-*Thank you for your help — every contribution moves independent threat
-monitoring forward. 🇺🇦*
+*Thank you for your help — every contribution moves independent global threat
+monitoring forward. 🌍 🇺🇦*
 
 <h3 align="center">
 This is what the project is becoming — it's getting closer to this vision step by step,<br>
@@ -64,7 +71,7 @@ The link will be here ---> (Not yet)
 ## Architecture
 
 ```
-Collectors (10 sources, see table below)
+Collectors (18 sources, see table below — UA + World)
 ↓
 Normalizer (inside each collector → Threat)
 ↓
@@ -86,11 +93,13 @@ Dashboard (Next.js, Vercel) n8n Webhook → AI Agent → Telegram
 | NVD | World | CVE + CVSS score | ✅ real API |
 | CISA KEV | World | actively exploited CVEs | ✅ real API |
 | GitHub | World | PoC exploits | ✅ |
+| GitHub Advisory Database | World | security advisories | ✅ |
 | Exploit-DB | World | ready-made exploits | ✅ |
 | The Hacker News / BleepingComputer | World | news | ✅ RSS |
 | NCSC UK | World | official threat reports | ✅ RSS |
 | ThreatFox (abuse.ch) | World | IOCs (malicious IPs/domains/hashes) | ✅ real API |
 | MalwareBazaar | World | malware samples | ✅ real API |
+| URLhaus (abuse.ch) | World | malicious URLs (malware/C2) | ✅ real API |
 | AlienVault OTX | World | pulse reports | ✅ |
 | CERT-UA | UA | advisories | ✅ RSS |
 | Cyber Police of Ukraine | UA | news | ✅ |
@@ -98,6 +107,11 @@ Dashboard (Next.js, Vercel) n8n Webhook → AI Agent → Telegram
 | NCCC under the NSDC | UA | news | ✅ |
 | SSU / Cybersecurity Department | UA | news | ⚠️ scraper, depends on site layout |
 | Vendor RSS | UA | vendor publications about Ukraine | ✅ |
+| Curated feed | UA | manually verified threats | ✅ |
+
+The **region toggle (Ukraine / World)** is at the core of the new direction:
+every threat carries a region, so the same dashboard serves both the national
+and the global picture.
 
 ## Risk Metrics (not just a Severity label)
 
@@ -139,7 +153,7 @@ value, source, and a link to the original. API filter: `GET /threats?category=fe
 
 ## What's Done
 
-- [x] 10 collectors (UA + World), a unified `Threat` model, deduplication, EPSS enrichment
+- [x] 18 collectors (UA + World), a unified `Threat` model, deduplication, EPSS enrichment
 - [x] REST API on FastAPI: `/threats`, `/stats`, `/timeline/{cve}`, `/health`
 - [x] Next.js dashboard: KPI tiles, top vendors, threats table, Ukraine/World toggle
 - [x] Cyber Timeline — CVE history (publication → PoC → CISA KEV) with an exploitation-speed verdict
@@ -148,6 +162,7 @@ value, source, and a link to the original. API filter: `GET /threats?category=fe
 - [x] Database — **PostgreSQL on Neon** (free tier)
 - [x] Frontend deployed on **Vercel**
 - [x] **AI Automation via n8n**: after every pipeline run, data is sent to an n8n webhook → AI Agent (Groq + SerpAPI to look up context for unfamiliar threats) analyzes the summary → a formatted post is automatically published to a Telegram channel
+- [x] **pytest suite (116 tests)**: collectors, API, scoring, enrichment, timeline — runs in CI on every push
 
 ## Automation: pipeline → n8n → Telegram
 
@@ -176,6 +191,9 @@ python -m app.pipeline
 # Start the API
 uvicorn app.main:app --reload
 # → http://localhost:8000/docs — Swagger UI with all endpoints
+
+# Run the test suite
+pytest tests -q
 ```
 
 ## Quick Start (Frontend)
@@ -229,11 +247,13 @@ N8N_WEBHOOK_URL= # n8n webhook for auto-publishing to Telegram
 ## Roadmap
 
 - [x] Collectors, unified model, database, API
-- [x] 10 sources (UA + World), CVSS/EPSS/exploit maturity, region toggle
+- [x] 18 sources (UA + World), CVSS/EPSS/exploit maturity, region toggle
 - [x] Next.js dashboard
 - [x] Cyber Timeline
 - [x] Backend deployed on Render + Neon, frontend on Vercel
 - [x] AI Automation via n8n: automatic Telegram summaries
+- [x] pytest suite + CI
+- [ ] **Expand the global picture** — add more international sources (EU, APAC, LATAM) and multi-region filtering
 - [ ] Verify scraper stability for SSU (depends on site layout)
 - [ ] Expand AI summarization (`/threats/{id}/explain`)
 - [ ] Hourly statistics in `/stats` for a real pulse line (currently a demo wave)
