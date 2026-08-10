@@ -74,11 +74,12 @@ class GenericHTMLCollector(BaseCollector):
             if not title:
                 continue
 
-            link_el = (
-                item.select_one(self.config.link_selector)
-                if self.config.link_selector
-                else (item if item.name == "a" else title_el)
-            )
+            link_el = None
+            if self.config.link_selector:
+                link_el = item.select_one(self.config.link_selector)
+            else:
+                anchor = item if item.name == "a" else item.find("a")
+                link_el = anchor or title_el
             href = link_el.get(self.config.link_attr, "") if link_el else ""
             if href and self.config.base_url and not href.startswith("http"):
                 href = self.config.base_url.rstrip("/") + "/" + href.lstrip("/")
