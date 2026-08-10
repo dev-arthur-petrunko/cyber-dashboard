@@ -1,0 +1,38 @@
+name: Python CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Compile all Python modules
+        run: python -m compileall app
+
+      - name: Verify pipeline imports (all collectors)
+        run: |
+          python - <<'EOF'
+          import app.pipeline as p
+          assert p.COLLECTORS, "no collectors registered"
+          print(f"OK: {len(p.COLLECTORS)} collectors registered")
+          EOF
+
+      - name: Verify FastAPI app builds
+        run: |
+          python - <<'EOF'
+          from app.main import app
+          routes = sorted(r.path for r in app.routes if r.path.startswith("/"))
+          print("OK routes:", routes)
+          EOF

@@ -32,6 +32,10 @@ next-env.d.ts
 *.swo
 *~
 
+# AI assistant skills (local only)
+.agents/
+skills-lock.json
+
 # OS
 .DS_Store
 Thumbs.db
