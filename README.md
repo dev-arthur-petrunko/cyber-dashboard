@@ -18,6 +18,22 @@ dashboard and automatically publishes summaries to Telegram via n8n.
 🔗 **Demo:** [cyber-dashboard-gamma.vercel.app](https://cyber-dashboard-gamma.vercel.app)
 🔗 **Repository:** [github.com/dev-arthur-petrunko/cyber-dashboard](https://github.com/dev-arthur-petrunko/cyber-dashboard)
 
+## Support the project 💙
+
+This project monitors cyber threats not only for **Ukraine**, but for the **whole
+world** — and it stays free thanks to people like you. The development of new
+sources, AI threat analysis, infrastructure, and regular updates take time and
+resources.
+
+- 🔗 **Updated project & latest version** — everything you need to know, the
+  current links, and the newest build are always here in this README.
+- 🤝 **Ways to support:** any donation helps keep the dashboard free, expand the
+  source list, and improve data quality. Details on how to support the project
+  will be listed here — stay tuned.
+
+*Thank you for your help — every contribution moves independent threat
+monitoring forward. 🇺🇦*
+
 <h3 align="center">
 This is what the project is becoming — it's getting closer to this vision step by step,<br>
 and it moves forward only with your support 🚀 Soon I will post a link to the site here and you can use it and help with the development of this project.
