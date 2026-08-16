@@ -30,7 +30,7 @@ CYBER_KEYWORDS = [
 
 # Exclude non-threat content (competitions, CTFs, education events)
 EXCLUDE_KEYWORDS = [
-    "ctf", "shehack", "конкурс", "конкурс", "змагання", "соревнован",
+    "ctf", "shehack", "конкурс", "змагання", "соревнован",
     "challenge", "чемпіонат", "першість", "турнір", "хакатон", "hackathon",
     "конференц", "conference", "форум", "навчанн", "обучен",
 ]

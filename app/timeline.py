@@ -101,8 +101,12 @@ def build_timeline(db: Session, cve_id: str) -> dict:
     else:
         verdict = "Поки що немає підтверджених PoC або фактів експлуатації в дикій природі."
 
-    best_cvss = next((r.cvss_score for r in rows if r.cvss_score is not None), None)
-    best_epss = next((r.epss_score for r in rows if r.epss_score is not None), None)
+    best_cvss = max(
+        (r.cvss_score for r in rows if r.cvss_score is not None), default=None
+    )
+    best_epss = max(
+        (r.epss_score for r in rows if r.epss_score is not None), default=None
+    )
 
     return {
         "cve_id": cve_id.upper(),

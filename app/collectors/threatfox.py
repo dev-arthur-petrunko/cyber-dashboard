@@ -73,7 +73,7 @@ class ThreatFoxCollector(BaseCollector):
             ioc_type = ioc.get("ioc_type", "")
 
             # confidence_level (0-100) от abuse.ch -> грубая severity
-            confidence = ioc.get("confidence_level", 0)
+            confidence = ioc.get("confidence_level") or 0
             severity = (
                 Severity.critical if confidence >= 90 else
                 Severity.high if confidence >= 70 else

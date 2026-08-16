@@ -65,7 +65,10 @@ class GitHubAdvisoriesCollector(BaseCollector):
             ]
             cve_id = advisory.get("cve_id")
             cvss = (advisory.get("cvss") or {}).get("score")
-            epss = (advisory.get("epss") or {}).get("percentage")
+            # GitHub API отдаёт epss.percentage в шкале 0–100, а модель Threat
+            # хранит вероятность 0–1 — приводим к единому диапазону.
+            epss_raw = (advisory.get("epss") or {}).get("percentage")
+            epss = (epss_raw / 100.0) if isinstance(epss_raw, (int, float)) else None
             ghsa_id = advisory.get("ghsa_id")
             if not ghsa_id:
                 continue

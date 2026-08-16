@@ -155,7 +155,6 @@ VENDOR_KEYWORDS: dict[str, str] = {
     "gitlab": "GitLab",
     "teamviewer": "TeamViewer",
     "anydesk": "AnyDesk",
-    "nginx": "Nginx",
     "aws": "Amazon Web Services",
     "amazon": "Amazon",
     "wifi": "Wi-Fi",

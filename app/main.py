@@ -207,6 +207,11 @@ def stats(db: Session = Depends(get_session), region: Optional[str] = None):
     )
 
     last_update = db.query(func.max(ThreatORM.fetched_at)).scalar()
+    if region:
+        last_update = (
+            base.with_entities(func.max(ThreatORM.fetched_at)).scalar()
+            or last_update
+        )
 
     return {
         "critical_threats": critical,

@@ -89,6 +89,16 @@ def test_non_ok_status_returns_empty(monkeypatch):
     assert ThreatFoxCollector().fetch() == []
 
 
+def test_null_confidence_does_not_crash(monkeypatch):
+    monkeypatch.setenv("ABUSECH_AUTH_KEY", "test-key")
+    payload = _make_payload()
+    payload["data"][0]["confidence_level"] = None
+    monkeypatch.setattr(requests, "post", lambda *a, **k: _FakeResponse(payload))
+    threats = ThreatFoxCollector().fetch()
+    assert len(threats) == 2
+    assert threats[0].severity == "Medium"
+
+
 def test_request_failure_returns_empty(monkeypatch):
     monkeypatch.setenv("ABUSECH_AUTH_KEY", "test-key")
 
