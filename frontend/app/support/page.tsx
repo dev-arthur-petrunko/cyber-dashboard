@@ -54,6 +54,8 @@ export default function SupportPage() {
           <div className="rounded-xl border border-border bg-panel p-4 shadow-sm sm:p-6">
             <p className="text-sm leading-relaxed text-text-secondary">{t.support.p1}</p>
             <p className="mt-3 text-sm leading-relaxed text-text-secondary">{t.support.p2}</p>
+            <p className="mt-3 text-sm leading-relaxed text-text-secondary">{t.support.p3}</p>
+            <p className="mt-3 text-sm leading-relaxed text-text-secondary">{t.support.p4}</p>
 
             <figure className="mt-4 overflow-hidden rounded-xl border border-border">
               <img
@@ -63,12 +65,11 @@ export default function SupportPage() {
                 loading="lazy"
               />
               <figcaption className="border-t border-border bg-panel-raised/60 px-4 py-2.5 text-center text-xs text-text-muted">
-                📸 {t.support.imageCaption}
+                {t.support.imageCaption}
               </figcaption>
             </figure>
 
-            <p className="mt-3 text-sm leading-relaxed text-text-secondary">{t.support.p3}</p>
-            <p className="mt-3 text-sm leading-relaxed text-text-secondary">{t.support.p4}</p>
+            <p className="mt-3 text-sm leading-relaxed text-text-secondary">{t.support.p5}</p>
             <p className="mt-3 text-sm leading-relaxed text-text-secondary">{t.support.thanks}</p>
           </div>
         </section>
