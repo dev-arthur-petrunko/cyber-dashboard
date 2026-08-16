@@ -73,7 +73,7 @@ export default function SupportPage() {
 
             <div className="grid gap-3 sm:grid-cols-2">
               <a
-                href="#"
+                href="https://ko-fi.com/arthurpetrunko"
                 target="_blank"
                 rel="noreferrer"
                 className="group inline-flex items-center justify-between gap-2 rounded-xl border border-border bg-panel p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-signal/40 hover:shadow-md"
